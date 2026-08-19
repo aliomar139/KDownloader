@@ -3,10 +3,11 @@ package com.kira.kdownloader.settings
 import com.kira.kdownloader.settings.store.InMemorySecureStore
 import com.kira.kdownloader.settings.store.KeyValueStore
 import com.kira.kdownloader.settings.store.SecureStore
+import androidx.lifecycle.Observer
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 
 /**
  * Single source of truth for reading, observing, and persisting [AppSettings].
@@ -32,7 +33,7 @@ class SettingsRepository(
         // Fully materialize defaults once, at startup, so later single-field edits touch exactly one
         // key instead of rewriting the entire preference set (and firing a listener storm).
         if (fresh) {
-            store.edit { encodeFields(AppSettings.DEFAULTS, EditorSink(this)) }
+            store.edit { editor -> encodeFields(AppSettings.DEFAULTS, EditorSink(editor)) }
         }
     }
 
@@ -48,17 +49,19 @@ class SettingsRepository(
         )
     }
 
-    fun observe(): Flow<AppSettings> = store.changes
-        .onStart { emit(null) }
-        .map { read() }
-        .distinctUntilChanged()
+    fun observe(): Flow<AppSettings> = callbackFlow {
+        val observer = Observer<String?> { trySend(read()) }
+        store.changes.observeForever(observer)
+        trySend(read())
+        awaitClose { store.changes.removeObserver(observer) }
+    }.distinctUntilChanged()
 
     // ---- Write ---------------------------------------------------------------
 
     /** Persists a sanitized snapshot, writing only the keys whose values actually changed. */
     fun save(settings: AppSettings) {
         val clean = sanitize(settings)
-        store.edit { encodeFields(clean, DiffEditorSink(this)) }
+        store.edit { editor -> encodeFields(clean, DiffEditorSink(editor)) }
     }
 
     /** Read-modify-write convenience: `update { it.copy(...) }`. */
@@ -74,10 +77,10 @@ class SettingsRepository(
     fun setProxyPassword(password: String?) {
         if (password.isNullOrEmpty()) {
             secure.remove(SecureKeys.PROXY_PASSWORD)
-            store.edit { putBoolean(SettingsKeys.NW_PROXY_PASSWORD_SET, false) }
+            store.edit { editor -> editor.putBoolean(SettingsKeys.NW_PROXY_PASSWORD_SET, false) }
         } else {
             secure.put(SecureKeys.PROXY_PASSWORD, password)
-            store.edit { putBoolean(SettingsKeys.NW_PROXY_PASSWORD_SET, true) }
+            store.edit { editor -> editor.putBoolean(SettingsKeys.NW_PROXY_PASSWORD_SET, true) }
         }
     }
 

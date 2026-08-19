@@ -54,11 +54,12 @@ class DownloadService : Service() {
         val headerKeys = intent.getStringArrayListExtra(EXTRA_HEADER_KEYS).orEmpty()
         val headerValues = intent.getStringArrayListExtra(EXTRA_HEADER_VALUES).orEmpty()
         val choice = DownloadChoice(
-            label = label,
-            kind = kind,
-            formatSelector = selector,
-            directUrl = intent.getStringExtra(EXTRA_DIRECT_URL),
-            httpHeaders = headerKeys.zip(headerValues).toMap(),
+            label,
+            kind,
+            selector,
+            intent.getStringExtra(EXTRA_DIRECT_URL),
+            headerKeys.zip(headerValues).toMap(),
+            null,
         )
         // Prefer the caller-supplied id so the UI can cancel this exact download; fall back to a
         // generated one for older callers.
@@ -265,10 +266,7 @@ class DownloadService : Service() {
 
         addAttempt(choice, useTikTokAppInfo = true)
 
-        val extractedChoice = choice.copy(
-            directUrl = null,
-            httpHeaders = emptyMap(),
-        )
+        val extractedChoice = choice.withDirect(null, emptyMap())
         if (!choice.directUrl.isNullOrBlank()) {
             addAttempt(extractedChoice, useTikTokAppInfo = true)
         }
@@ -280,8 +278,8 @@ class DownloadService : Service() {
             choice.kind == FormatSelector.Kind.VIDEO &&
             choice.formatSelector != FormatSelector.FALLBACK_VIDEO_SELECTOR
         ) {
-            val genericVideoChoice = extractedChoice.copy(
-                formatSelector = FormatSelector.FALLBACK_VIDEO_SELECTOR,
+            val genericVideoChoice = extractedChoice.withFormatSelector(
+                FormatSelector.FALLBACK_VIDEO_SELECTOR,
             )
             addAttempt(genericVideoChoice, useTikTokAppInfo = true)
             if (ExtractorOptions.isTikTokUrl(url)) {

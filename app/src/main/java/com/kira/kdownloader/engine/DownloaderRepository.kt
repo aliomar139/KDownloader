@@ -85,15 +85,15 @@ class DownloaderRepository(context: Context) {
                 val info = YoutubeDL.getInstance().getInfo(infoRequest)
                 val formats = info.formats.orEmpty().map { format ->
                     FormatInput(
-                        formatId = format.formatId.orEmpty(),
-                        ext = format.ext.orEmpty(),
-                        height = format.height.takeIf { it > 0 },
-                        vcodec = format.vcodec,
-                        acodec = format.acodec,
-                        url = format.url,
-                        httpHeaders = format.httpHeaders.orEmpty(),
+                        format.formatId.orEmpty(),
+                        format.ext.orEmpty(),
+                        format.height.takeIf { it > 0 },
+                        format.vcodec,
+                        format.acodec,
+                        format.url,
+                        format.httpHeaders.orEmpty(),
                         // yt-dlp reports exact `filesize` or `filesize_approx`; prefer the former.
-                        filesize = format.fileSize.takeIf { it > 0 }
+                        format.fileSize.takeIf { it > 0 }
                             ?: format.fileSizeApproximate.takeIf { it > 0 },
                     )
                 }

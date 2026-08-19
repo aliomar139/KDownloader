@@ -13,6 +13,9 @@ interface DownloadDao {
     @Insert
     suspend fun insert(entity: DownloadEntity): Long
 
+    @Insert
+    fun insertSync(entity: DownloadEntity): Long
+
     @Query("UPDATE downloads SET status = :status, fileUri = :fileUri WHERE id = :id")
     suspend fun updateStatusAndUri(id: Long, status: DownloadStatus, fileUri: String?)
 
@@ -21,6 +24,9 @@ interface DownloadDao {
 
     @Query("SELECT fileUri FROM downloads WHERE fileUri IS NOT NULL")
     suspend fun getAllFileUris(): List<String>
+
+    @Query("SELECT fileUri FROM downloads WHERE fileUri IS NOT NULL")
+    fun getAllFileUrisSync(): List<String>
 
     @Query("DELETE FROM downloads WHERE id = :id")
     suspend fun deleteById(id: Long)

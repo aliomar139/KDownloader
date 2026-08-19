@@ -107,9 +107,9 @@ import com.kira.kdownloader.service.DownloadEvents
 import com.kira.kdownloader.service.DownloadService
 import com.kira.kdownloader.util.RecentUrls
 import com.kira.kdownloader.util.UrlExtractor
-import com.kira.kdownloader.util.formatBytes
-import com.kira.kdownloader.util.formatDuration
-import com.kira.kdownloader.util.formatEta
+import com.kira.kdownloader.util.FormattingKt.formatBytes
+import com.kira.kdownloader.util.FormattingKt.formatDuration
+import com.kira.kdownloader.util.FormattingKt.formatEta
 import kotlinx.coroutines.launch
 
 @Composable

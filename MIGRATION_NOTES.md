@@ -33,6 +33,17 @@ None yet.
 - Gates: clean `assembleDebug` and `testDebugUnitTest` passed (65 tests, 0 failures); `verifyBundledYtDlp` ran through `preBuild`.
 - Connected-device and manual visual-parity gates: skipped because no device or emulator is connected.
 
+## Phase 3 — Leaf logic to Java
+
+- Replaced all 18 scoped Kotlin leaf files with Java: six utilities, three settings stores, five settings primitives, and four engine helpers.
+- Ported the 10 specified JVM test classes to Java with all 54 test methods retained; the full suite remains 65 tests.
+- Replaced coroutine-backed leaf operations with blocking `@WorkerThread` methods. Existing Compose callers explicitly dispatch scanner and thumbnail work to `Dispatchers.IO` until their owning screens are migrated.
+- Replaced settings change `Flow` at the store boundary with lifecycle-aware `LiveData`; `SettingsRepository` contains the temporary Flow bridge until Phase 5.
+- Added blocking Room DAO helpers for scanner insertion and URI reads. They reuse the existing SQL/insert contract and will become the primary Java DAO methods in Phase 4.
+- Kotlin data-class conveniences at mixed-language call sites were replaced with explicit Java constructors and `withDirect` / `withFormatSelector` methods.
+- Gates: `assembleDebug` and `testDebugUnitTest` passed; 65 tests, zero failures.
+- Connected-device and manual gates: skipped because no device or emulator is connected.
+
 ## Kotlin-library Java interop adaptations
 
 None yet.

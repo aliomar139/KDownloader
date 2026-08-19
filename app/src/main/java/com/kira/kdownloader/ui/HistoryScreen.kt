@@ -154,7 +154,9 @@ fun HistoryScreen(
 
     LaunchedEffect(context, dao, scanGeneration) {
         // Force a fresh scan when re-triggered by a permission grant; otherwise let it throttle.
-        DownloadDirectoryScanner.syncIntoHistory(context, dao, force = scanGeneration > 0)
+        withContext(Dispatchers.IO) {
+            DownloadDirectoryScanner.syncIntoHistory(context, dao, scanGeneration > 0)
+        }
     }
     LaunchedEffect(context, mediaPermissions) {
         val missingPermissions = mediaPermissions.filter { permission ->
@@ -167,7 +169,9 @@ fun HistoryScreen(
     }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         scope.launch {
-            DownloadDirectoryScanner.syncIntoHistory(context, dao)
+            withContext(Dispatchers.IO) {
+                DownloadDirectoryScanner.syncIntoHistory(context, dao)
+            }
         }
     }
 
@@ -710,7 +714,9 @@ private fun LocalMediaThumbnail(fileUri: String, isAudio: Boolean) {
     val context = LocalContext.current
     // Seed with any already-cached bitmap so revisiting this screen paints instantly (no flicker).
     val bitmap by produceState<Bitmap?>(initialValue = MediaThumbnails.peek(fileUri), fileUri) {
-        if (value == null) value = MediaThumbnails.load(context, fileUri, isAudio)
+        if (value == null) value = withContext(Dispatchers.IO) {
+            MediaThumbnails.load(context, fileUri, isAudio)
+        }
     }
     val bmp = bitmap
     if (bmp != null) {
