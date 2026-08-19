@@ -121,3 +121,13 @@ None yet.
 - Gates: clean `assembleDebug`, `assembleRelease`, `lintDebug`, `testDebugUnitTest` (65 passed), and `verifyBundledYtDlp` passed. The first release attempt encountered a transient Windows lock on generated `classes.dex`; stopping Gradle, removing only the generated release dex directory, and retrying with one worker succeeded.
 - Java-only debug APK: 160,361,304 bytes. Unsigned release APK: 157,127,344 bytes.
 - Connected instrumentation and manual/device gates remain skipped because no device or emulator is connected.
+
+## Phase 11 — Final verification
+
+- Final gates passed: clean `assembleDebug`, `testDebugUnitTest` (65/65), `assembleRelease`, `lintDebug` (zero errors), `verifyBundledYtDlp`, and `assembleDebugAndroidTest`.
+- `connectedDebugAndroidTest`, the 31-item behavioral sweep, and upgrade-over-Kotlin-install verification were skipped: final `adb devices -l` returned no connected device or emulator.
+- The Java parity extraction matches `PARITY_BASELINE.txt`: 92 preference keys, 69 option-key occurrences across 19 `SettingOption` enums, 13 service string constants, 3 database identifiers, and 10 yt-dlp CLI flags. The manifest is byte-for-byte unchanged.
+- Protected-path diffs against `kotlin-final` are empty for `res/raw`, launcher icons, `app/proguard-rules.pro`, the Gradle wrapper, `LICENSE`, and `AndroidManifest.xml`.
+- Final debug APK: 159,144,851 bytes, 107,515 method references across 11 DEX files. Compared with the Kotlin baseline, that is 12,072,488 bytes (7.05%) smaller and 73,233 method references (40.52%) fewer.
+- Final unsigned release APK: 157,126,732 bytes, 106,498 method references across 2 DEX files.
+- The dependency graph still contains Kotlin stdlib and coroutines transitively through `youtubedl-android`; there are no direct Kotlin/Compose/coroutines app dependencies. This is the approved library-boundary exception.
