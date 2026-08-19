@@ -81,6 +81,16 @@ None yet.
 - Gates: `assembleDebug` and `testDebugUnitTest` passed; 65 JVM tests, zero failures. `verifyBundledYtDlp` also passed through `preBuild`.
 - Connected-device tab reachability, badge rendering, share-intent, locale, and visual gates: skipped because no device or emulator is connected.
 
+## Phase 7 â€” Native Home
+
+- Converted `HomeViewModel` and its sealed UI state to Java. Fetch work now uses a cancellable `Future`, stale-result generation checks, the same 5-minute/20-entry format cache, background engine warm-up, and explicit repository shutdown.
+- Replaced `HomeScreen.kt` and the Home `ComposeView` bridge with a native `HomeFragment`, Material Views layout, `FormatAdapter`, and `ActiveDownloadAdapter`.
+- Preserved URL typing/paste/IME fetch, shared-link updates, clipboard suggestion refresh/dismissal, recent URLs, idle/loading shimmer/error/retry/result states, media thumbnail/title/metadata, recommended format labeling, approximate sizes, and download start feedback.
+- Preserved live download percent/ETA, active-download sheet and cancellation, notification cancellation through the same process id, failure dialog, completion snackbar with Open action, MediaStore URI launching, and the persisted light/dark toggle.
+- Approved deviation: Compose fades are represented by direct visibility changes in the Home state container; the loading shimmer remains animated and the app-wide Reduce animations behavior is still honored for shell transitions.
+- Gates: `assembleDebug` and `testDebugUnitTest` passed; 65 JVM tests, zero failures. `verifyBundledYtDlp` also passed through `preBuild`.
+- Behavioral checklist items 1â€“12 require a real device/emulator and were skipped because none is connected.
+
 ## Pre-existing issues not fixed here
 
 - No device was available to identify runtime-only baseline issues.

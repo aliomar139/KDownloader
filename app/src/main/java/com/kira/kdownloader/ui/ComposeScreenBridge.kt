@@ -1,45 +1,44 @@
 package com.kira.kdownloader.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.lifecycle.Observer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kira.kdownloader.settings.AppTheme
 import com.kira.kdownloader.settings.AppearanceSettings
 import com.kira.kdownloader.settings.ui.SettingsScreen
 import com.kira.kdownloader.settings.ui.SettingsViewModel
 import com.kira.kdownloader.ui.theme.KDownloaderTheme
-import com.kira.kdownloader.util.StateHolder
+
+@Composable
+fun ThemeToggleButton(darkTheme: Boolean, onToggleTheme: () -> Unit) {
+    IconButton(
+        onClick = onToggleTheme,
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        ),
+    ) {
+        Icon(
+            if (darkTheme) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+            contentDescription = if (darkTheme) "Switch to light theme" else "Switch to dark theme",
+        )
+    }
+}
 
 /** Temporary host used only while the three Compose screens are replaced one phase at a time. */
 object ComposeScreenBridge {
     fun interface RedownloadHandler {
         fun onRedownload(url: String)
-    }
-
-    @JvmStatic
-    fun setHomeContent(
-        view: ComposeView,
-        incomingUrl: StateHolder<String>,
-        settingsViewModel: SettingsViewModel,
-        onToggleTheme: Runnable,
-    ) {
-        prepare(view)
-        view.setContent {
-            val url by produceState(incomingUrl.get(), incomingUrl) {
-                val live = incomingUrl.live()
-                val observer = Observer<String> { value = it }
-                live.observeForever(observer)
-                awaitDispose { live.removeObserver(observer) }
-            }
-            BridgeTheme(settingsViewModel) { _, darkTheme ->
-                HomeScreen(url, darkTheme, onToggleTheme::run)
-            }
-        }
     }
 
     @JvmStatic

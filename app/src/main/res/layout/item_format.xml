@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="10dp" app:cardBackgroundColor="?attr/colorSurfaceContainer" app:cardElevation="0dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:padding="12dp">
+        <ImageView android:id="@+id/format_icon" android:layout_width="42dp" android:layout_height="42dp" android:padding="9dp" app:tint="?attr/colorOnPrimaryContainer" />
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:id="@+id/format_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.KDownloader.TitleSmall" />
+            <TextView android:id="@+id/format_summary" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="?attr/colorOnSurfaceVariant" android:textSize="12sp" />
+            <com.google.android.material.progressindicator.LinearProgressIndicator android:id="@+id/format_progress" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:visibility="gone" />
+        </LinearLayout>
+        <TextView android:id="@+id/format_status" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:textColor="?attr/colorPrimary" />
+        <ImageButton android:id="@+id/format_action" style="?attr/borderlessButtonStyle" android:layout_width="48dp" android:layout_height="48dp" android:contentDescription="Download" android:src="@drawable/ic_download" app:tint="?attr/colorPrimary" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
