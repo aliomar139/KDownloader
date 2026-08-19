@@ -118,7 +118,7 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     public void toggleTheme() {
-        AppearanceSettings appearance = settingsViewModel.getSettings().getValue().getAppearance();
+        AppearanceSettings appearance = settingsViewModel.getSettingsValue().getAppearance();
         AppTheme next = isDarkTheme(appearance.getTheme()) ? AppTheme.LIGHT : AppTheme.DARK;
         settingsViewModel.setAppearance(appearance.withTheme(next));
     }

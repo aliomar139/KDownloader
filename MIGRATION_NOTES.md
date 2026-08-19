@@ -103,3 +103,12 @@ None yet.
 ## Pre-existing issues not fixed here
 
 - No device was available to identify runtime-only baseline issues.
+
+## Phase 9 — Native Settings
+
+- Converted `SettingsViewModel` and `FolderSlot` to Java and replaced the Settings Compose bridge with a native `SettingsFragment` and Material View preference components.
+- Preserved the 12-category order/titles/icons, every persisted setting group, conditional enablement, bounded sliders, validated filename/time/network/proxy inputs, and secure proxy-password storage.
+- Preserved all four SAF folder pickers, readable/revoked-access status, JSON export/import MIME contracts, diagnostic text export, maintenance actions, permission deep links, and the original four reset flows.
+- Deleted the Settings Compose files, shared Compose bridge, and the now-unused Kotlin theme sources. No `.kt` or `.kts` source files remain in the working tree.
+- Gates: `assembleDebug` and `testDebugUnitTest` passed; 65 JVM tests, zero failures. `verifyBundledYtDlp` also passed through `preBuild`.
+- Behavioral checklist items 20–30, preference restart round-trips, and API-level language/folder/permission checks require a real device or emulator and were skipped because none is connected.
