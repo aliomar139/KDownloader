@@ -15,6 +15,13 @@
 
 None yet.
 
+## Phase 1 — Groovy build scripts
+
+- Replaced `build.gradle.kts`, `settings.gradle.kts`, and `app/build.gradle.kts` with Groovy DSL equivalents.
+- Kotlin Android, Compose, and KSP plugins and all dependencies remain intentionally enabled for mixed-source migration phases.
+- Gates: `assembleDebug`, `testDebugUnitTest` (65 passed), and `verifyBundledYtDlp` passed before and after deleting the `.kts` scripts.
+- Connected-device and manual gates: skipped because no device or emulator is connected.
+
 ## Kotlin-library Java interop adaptations
 
 None yet.
