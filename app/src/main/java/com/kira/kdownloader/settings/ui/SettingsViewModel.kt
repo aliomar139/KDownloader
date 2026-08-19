@@ -3,6 +3,7 @@ package com.kira.kdownloader.settings.ui
 import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.Observer
 import androidx.lifecycle.viewModelScope
 import com.kira.kdownloader.data.AppDatabase
 import com.kira.kdownloader.settings.AppSettings
@@ -23,10 +24,8 @@ import com.kira.kdownloader.settings.store.KeystoreSecureStore
 import com.kira.kdownloader.settings.store.SharedPreferencesKeyValueStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -37,18 +36,29 @@ enum class FolderSlot { DOWNLOAD, VIDEO, AUDIO, TEMP }
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = SettingsRepository(
-        store = SharedPreferencesKeyValueStore(application),
-        secure = KeystoreSecureStore(application),
+        SharedPreferencesKeyValueStore(application),
+        KeystoreSecureStore(application),
     )
 
     val folders = FolderAccessManager(application)
     val system = SystemStatus(application)
 
-    val settings: StateFlow<AppSettings> = repository.observe()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, repository.read())
+    private val settingsLive = repository.observe()
+    private val settingsState = MutableStateFlow(repository.read())
+    private val settingsObserver = Observer<AppSettings> { settingsState.value = it }
+    val settings: StateFlow<AppSettings> = settingsState.asStateFlow()
 
     private val statusState = MutableStateFlow(system.snapshot())
     val systemStatus: StateFlow<SystemStatus.Snapshot> = statusState.asStateFlow()
+
+    init {
+        settingsLive.observeForever(settingsObserver)
+    }
+
+    override fun onCleared() {
+        settingsLive.removeObserver(settingsObserver)
+        super.onCleared()
+    }
 
     fun refreshStatus() {
         statusState.value = system.snapshot()

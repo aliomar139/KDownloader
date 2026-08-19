@@ -214,6 +214,7 @@ fun HistoryPrivacySectionContent(settings: AppSettings, vm: SettingsViewModel) {
                 is SettingsRepository.ImportResult.Success -> "Imported ${result.applied} settings"
                 is SettingsRepository.ImportResult.Failure -> result.reason
                 null -> "Could not read the file"
+                else -> "Could not import the file"
             }
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }

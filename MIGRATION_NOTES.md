@@ -57,7 +57,19 @@ None yet.
 
 ## Kotlin-library Java interop adaptations
 
-None yet.
+- `youtubedl-android:library:0.18.1` was inspected from the cached sources JAR and AAR bytecode before converting the engine. Java calls the library's Kotlin `Function3<Float, Long, String, Unit>` progress callback directly and returns `Unit.INSTANCE`.
+- The Kotlin `object` update channel is exposed to Java as `YoutubeDL.UpdateChannel._STABLE`; engine initialization continues through the library's `getInstance()` bridge.
+- `DownloaderRepository` now owns a single-thread executor for opportunistic yt-dlp updates, uses `ReentrantLock` for process-wide initialization/update serialization, and exposes blocking `@WorkerThread` engine operations. `HomeViewModel` dispatches those calls to `Dispatchers.IO` until its UI phase.
+- `DownloadService` now owns its worker executor and shuts it and the repository down in `onDestroy`. Cancellation still delegates to yt-dlp's process-id API.
+
+## Phase 5 â€” Repositories and download service
+
+- Converted `SettingsRepository`, the three settings platform managers, `DownloaderRepository`, `DownloadEvents`, and `DownloadService` to Java.
+- Replaced the settings/event Flow boundaries with `LiveData`/`StateHolder`; temporary lifecycle-aware adapters keep the remaining Compose screens behaviorally unchanged until their later phases.
+- Split `MediaInfo` and `EngineException` into Java types and preserved format extraction, TikTok fallback order, bundled yt-dlp replacement/version registration, update throttling/retries, output selection, notifications, database status updates, and process-id cancellation.
+- Service and repository executors are lifecycle-owned and explicitly shut down. Static locks preserve process-wide engine initialization and update serialization.
+- Gates: `assembleDebug` and `testDebugUnitTest` passed; 65 JVM tests, zero failures. `verifyBundledYtDlp` also passed through `preBuild`.
+- Connected-device, cancellation-under-load, background-service, and manual download parity gates: skipped because no device or emulator is connected.
 
 ## Pre-existing issues not fixed here
 

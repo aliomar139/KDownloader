@@ -38,10 +38,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kira.kdownloader.settings.AppTheme
 import com.kira.kdownloader.settings.SettingsRepository
@@ -99,7 +101,12 @@ class MainActivity : ComponentActivity() {
             }
 
             val incomingUrl by sharedUrl.collectAsStateWithLifecycle()
-            val downloadStates by DownloadEvents.states.collectAsStateWithLifecycle()
+            val downloadStates by produceState(DownloadEvents.getStates().get()) {
+                val liveStates = DownloadEvents.getStates().live()
+                val observer = Observer<Map<String, DownloadEvents.State>> { value = it }
+                liveStates.observeForever(observer)
+                awaitDispose { liveStates.removeObserver(observer) }
+            }
             val activeDownloads = downloadStates.count {
                 it.value.phase == DownloadEvents.Phase.PREPARING ||
                     it.value.phase == DownloadEvents.Phase.RUNNING

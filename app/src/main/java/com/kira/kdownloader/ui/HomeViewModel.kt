@@ -8,10 +8,12 @@ import com.kira.kdownloader.engine.MediaInfo
 import com.kira.kdownloader.util.RecentUrls
 import com.kira.kdownloader.util.UrlExtractor
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 sealed interface HomeUiState {
     data object Idle : HomeUiState
@@ -37,7 +39,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     fun warmUp() {
         if (warmed) return
         warmed = true
-        viewModelScope.launch { runCatching { repository.init() } }
+        viewModelScope.launch(Dispatchers.IO) { runCatching { repository.init() } }
     }
 
     fun fetch(url: String) {
@@ -57,8 +59,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         fetchJob = viewModelScope.launch {
             mutableState.value = HomeUiState.Loading
             try {
-                repository.init()
-                val info = repository.fetchInfo(normalizedUrl)
+                val info = withContext(Dispatchers.IO) {
+                    repository.init()
+                    repository.fetchInfo(normalizedUrl)
+                }
                 RecentUrls.add(getApplication<Application>(), normalizedUrl)
                 putCache(normalizedUrl, info)
                 mutableState.value = HomeUiState.Loaded(
@@ -83,6 +87,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         while (infoCache.size > MAX_CACHE_ENTRIES) {
             infoCache.remove(infoCache.keys.first())
         }
+    }
+
+    override fun onCleared() {
+        repository.close()
+        super.onCleared()
     }
 
     private companion object {

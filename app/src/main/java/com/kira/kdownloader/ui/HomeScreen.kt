@@ -78,6 +78,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -99,6 +100,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
 import com.kira.kdownloader.engine.DownloadChoice
@@ -124,7 +126,12 @@ fun HomeScreen(
     val keyboard = LocalSoftwareKeyboardController.current
     val haptics = LocalHapticFeedback.current
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val downloadStates by DownloadEvents.states.collectAsStateWithLifecycle()
+    val downloadStates by produceState(DownloadEvents.getStates().get()) {
+        val liveStates = DownloadEvents.getStates().live()
+        val observer = Observer<Map<String, DownloadEvents.State>> { value = it }
+        liveStates.observeForever(observer)
+        awaitDispose { liveStates.removeObserver(observer) }
+    }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var showDownloadsSheet by remember { mutableStateOf(false) }
@@ -269,19 +276,18 @@ fun HomeScreen(
                             DownloadEvents.update(
                                 key,
                                 DownloadEvents.State(
-                                    phase = DownloadEvents.Phase.PREPARING,
-                                    title = currentState.info.title,
-                                    kind = choice.kind.name,
-                                    processId = processId,
+                                    DownloadEvents.Phase.PREPARING, -1,
+                                    currentState.info.title, choice.kind.name,
+                                    null, null, -1L, processId,
                                 ),
                             )
                             DownloadService.start(
-                                context = context,
-                                url = currentState.sourceUrl,
-                                choice = choice,
-                                title = currentState.info.title,
-                                thumbnailUrl = currentState.info.thumbnailUrl,
-                                processId = processId,
+                                context,
+                                currentState.sourceUrl,
+                                choice,
+                                currentState.info.title,
+                                currentState.info.thumbnailUrl,
+                                processId,
                             )
                             scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.download_started)) }
                         },
