@@ -1,9 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.KDownloader" parent="@android:style/Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">#FAFAFA</item>
-        <item name="android:statusBarColor">#FAFAFA</item>
+    <style name="Theme.KDownloader" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/theme_primary</item>
+        <item name="colorOnPrimary">@color/theme_on_primary</item>
+        <item name="colorPrimaryContainer">@color/theme_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/theme_on_primary_container</item>
+        <item name="colorSecondary">@color/theme_secondary</item>
+        <item name="colorOnSecondary">@color/theme_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/theme_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/theme_on_secondary_container</item>
+        <item name="colorTertiary">@color/theme_tertiary</item>
+        <item name="colorOnTertiary">@color/theme_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/theme_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/theme_on_tertiary_container</item>
+        <item name="colorError">@color/theme_error</item>
+        <item name="colorOnError">@color/theme_on_error</item>
+        <item name="colorErrorContainer">@color/theme_error_container</item>
+        <item name="colorOnErrorContainer">@color/theme_on_error_container</item>
+        <item name="android:colorBackground">@color/theme_background</item>
+        <item name="colorOnBackground">@color/theme_on_background</item>
+        <item name="colorSurface">@color/theme_surface</item>
+        <item name="colorOnSurface">@color/theme_on_surface</item>
+        <item name="colorSurfaceVariant">@color/theme_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/theme_on_surface_variant</item>
+        <item name="colorOutline">@color/theme_outline</item>
+        <item name="colorOutlineVariant">@color/theme_outline_variant</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.KDownloader.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.KDownloader.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.KDownloader.Large</item>
+        <item name="android:windowBackground">@color/theme_background</item>
+        <item name="android:statusBarColor">@color/theme_background</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:navigationBarColor">#FAFAFA</item>
+        <item name="android:navigationBarColor">@color/theme_background</item>
+    </style>
+
+    <style name="ThemeOverlay.KDownloader.HighContrast" parent="">
+        <item name="android:colorBackground">@color/high_contrast_background</item>
+        <item name="colorOnBackground">@color/high_contrast_on_background</item>
+        <item name="colorSurface">@color/high_contrast_surface</item>
+        <item name="colorOnSurface">@color/high_contrast_on_surface</item>
+        <item name="colorSurfaceVariant">@color/high_contrast_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/high_contrast_on_surface_variant</item>
+        <item name="colorOutline">@color/high_contrast_outline</item>
     </style>
 </resources>

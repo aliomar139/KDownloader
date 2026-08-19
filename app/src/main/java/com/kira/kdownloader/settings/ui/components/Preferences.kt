@@ -1,5 +1,7 @@
 package com.kira.kdownloader.settings.ui.components
 
+import androidx.compose.ui.res.stringResource
+import com.kira.kdownloader.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -142,7 +144,7 @@ fun <T> SingleChoicePreference(
                 }
             },
             confirmButton = {},
-            dismissButton = { TextButton(onClick = { open = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }
@@ -252,7 +254,7 @@ fun ConfirmDialog(
                 )
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }
 
@@ -301,7 +303,7 @@ fun LabeledChoicePreference(
                 }
             },
             confirmButton = {},
-            dismissButton = { TextButton(onClick = { open = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }
@@ -373,9 +375,9 @@ fun TextEntryPreference(
                 TextButton(
                     enabled = error == null,
                     onClick = { onValueChange(draft); open = false },
-                ) { Text("Save") }
+                ) { Text(stringResource(R.string.save)) }
             },
-            dismissButton = { TextButton(onClick = { open = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }

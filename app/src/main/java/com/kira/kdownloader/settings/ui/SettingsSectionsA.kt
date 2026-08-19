@@ -1,5 +1,7 @@
 package com.kira.kdownloader.settings.ui
 
+import androidx.compose.ui.res.stringResource
+import com.kira.kdownloader.R
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -52,61 +54,61 @@ import java.net.Socket
 fun DownloadSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     val d = settings.download
 
-    PreferenceGroupTitle("Type & format")
-    SingleChoicePreference("Download type", DownloadType.entries.toList(), d.downloadType) {
+    PreferenceGroupTitle(stringResource(R.string.type_and_format))
+    SingleChoicePreference(stringResource(R.string.download_type), DownloadType.entries.toList(), d.downloadType) {
         vm.setDownload(d.copy(downloadType = it))
     }
-    SingleChoicePreference("Video format", VideoFormat.entries.toList(), d.videoFormat,
+    SingleChoicePreference(stringResource(R.string.video_format), VideoFormat.entries.toList(), d.videoFormat,
         enabled = d.downloadType != DownloadType.AUDIO_ONLY) {
         vm.setDownload(d.copy(videoFormat = it))
     }
-    SingleChoicePreference("Audio format", AudioFormat.entries.toList(), d.audioFormat) {
+    SingleChoicePreference(stringResource(R.string.audio_format), AudioFormat.entries.toList(), d.audioFormat) {
         vm.setDownload(d.copy(audioFormat = it))
     }
 
-    PreferenceGroupTitle("Quality")
-    SingleChoicePreference("Default video quality", VideoQuality.entries.toList(), d.videoQuality,
+    PreferenceGroupTitle(stringResource(R.string.quality))
+    SingleChoicePreference(stringResource(R.string.default_video_quality), VideoQuality.entries.toList(), d.videoQuality,
         enabled = d.downloadType != DownloadType.AUDIO_ONLY) {
         vm.setDownload(d.copy(videoQuality = it))
     }
-    SingleChoicePreference("Default audio quality", AudioQuality.entries.toList(), d.audioQuality) {
+    SingleChoicePreference(stringResource(R.string.default_audio_quality), AudioQuality.entries.toList(), d.audioQuality) {
         vm.setDownload(d.copy(audioQuality = it))
     }
-    SingleChoicePreference("Frame-rate preference", FrameRatePreference.entries.toList(), d.frameRate,
+    SingleChoicePreference(stringResource(R.string.frame_rate_preference), FrameRatePreference.entries.toList(), d.frameRate,
         enabled = d.downloadType != DownloadType.AUDIO_ONLY) {
         vm.setDownload(d.copy(frameRate = it))
     }
-    SwitchPreference("Prefer HDR when available", d.preferHdr,
+    SwitchPreference(stringResource(R.string.prefer_hdr_when_available), d.preferHdr,
         enabled = d.downloadType != DownloadType.AUDIO_ONLY) {
         vm.setDownload(d.copy(preferHdr = it))
     }
-    SwitchPreference("Prefer Android-compatible codecs", d.preferAndroidCompatibleCodecs,
-        subtitle = "Choose codecs that play on most Android media players") {
+    SwitchPreference(stringResource(R.string.prefer_android_compatible_codecs), d.preferAndroidCompatibleCodecs,
+        subtitle = stringResource(R.string.choose_codecs_that_play_on_most_android_media_players)) {
         vm.setDownload(d.copy(preferAndroidCompatibleCodecs = it))
     }
-    SwitchPreference("Automatically fall back", d.autoFallbackQuality,
-        subtitle = "Use the closest available quality or format when the requested one is missing") {
+    SwitchPreference(stringResource(R.string.automatically_fall_back), d.autoFallbackQuality,
+        subtitle = stringResource(R.string.use_the_closest_available_quality_or_format_when_the_requested_one_is)) {
         vm.setDownload(d.copy(autoFallbackQuality = it))
     }
-    SwitchPreference("Ask before each download", d.askQualityBeforeEachDownload,
-        subtitle = "Show a quality-selection dialog every time") {
+    SwitchPreference(stringResource(R.string.ask_before_each_download), d.askQualityBeforeEachDownload,
+        subtitle = stringResource(R.string.show_a_quality_selection_dialog_every_time)) {
         vm.setDownload(d.copy(askQualityBeforeEachDownload = it))
     }
-    PreferenceNote("When a format or quality is unavailable, the app explains the fallback it used instead of failing silently.")
+    PreferenceNote(stringResource(R.string.when_a_format_or_quality_is_unavailable_the_app_explains_the_fallback))
 
-    PreferenceGroupTitle("Metadata")
-    SwitchPreference("Download thumbnail when available", d.downloadThumbnail) {
+    PreferenceGroupTitle(stringResource(R.string.metadata))
+    SwitchPreference(stringResource(R.string.download_thumbnail_when_available), d.downloadThumbnail) {
         vm.setDownload(d.copy(downloadThumbnail = it))
     }
-    SwitchPreference("Embed thumbnail in audio files", d.embedThumbnail,
+    SwitchPreference(stringResource(R.string.embed_thumbnail_in_audio_files), d.embedThumbnail,
         enabled = d.downloadThumbnail) {
         vm.setDownload(d.copy(embedThumbnail = it))
     }
-    SwitchPreference("Embed title, artist, album & more", d.embedMetadata) {
+    SwitchPreference(stringResource(R.string.embed_title_artist_album_and_more), d.embedMetadata) {
         vm.setDownload(d.copy(embedMetadata = it))
     }
-    SwitchPreference("Preserve source upload date", d.preserveUploadDate,
-        subtitle = "When supported by the source") {
+    SwitchPreference(stringResource(R.string.preserve_source_upload_date), d.preserveUploadDate,
+        subtitle = stringResource(R.string.when_supported_by_the_source)) {
         vm.setDownload(d.copy(preserveUploadDate = it))
     }
 }
@@ -125,7 +127,7 @@ fun StorageSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     }
     fun pick(slot: FolderSlot) { pendingSlot = slot; picker.launch(null) }
 
-    PreferenceGroupTitle("Folders")
+    PreferenceGroupTitle(stringResource(R.string.folders))
     FolderRow("Default download folder", s.downloadFolderUri, vm.folders, { pick(FolderSlot.DOWNLOAD) }) {
         vm.clearFolder(FolderSlot.DOWNLOAD)
     }
@@ -140,16 +142,16 @@ fun StorageSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     }
     val available = FolderAccessManager.formatBytes(vm.folders.availableBytes())
     PreferenceNote("Available storage: $available. Folders are chosen with the Android system picker and access is remembered across restarts.")
-    SwitchPreference("Warn before download if space is low", s.warnOnLowSpace) {
+    SwitchPreference(stringResource(R.string.warn_before_download_if_space_is_low), s.warnOnLowSpace) {
         vm.setStorage(s.copy(warnOnLowSpace = it))
     }
 
-    PreferenceGroupTitle("File names")
-    SingleChoicePreference("On filename conflict", FilenameConflict.entries.toList(), s.filenameConflict) {
+    PreferenceGroupTitle(stringResource(R.string.file_names))
+    SingleChoicePreference(stringResource(R.string.on_filename_conflict), FilenameConflict.entries.toList(), s.filenameConflict) {
         vm.setStorage(s.copy(filenameConflict = it))
     }
     TextEntryPreference(
-        title = "Filename template",
+        title = stringResource(R.string.filename_template),
         value = s.filenameTemplate,
         onValueChange = { vm.setStorage(s.copy(filenameTemplate = it)) },
         summary = s.filenameTemplate,
@@ -158,33 +160,33 @@ fun StorageSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     PreferenceNote("Variables: ${FilenameTemplate.VARIABLES.joinToString(" ") { "{$it}" }}")
     PreferenceNote("Example: ${FilenameTemplate.example(s.filenameTemplate, s.maxFilenameLength)}.mp4")
     IntSliderPreference(
-        title = "Maximum filename length",
+        title = stringResource(R.string.maximum_filename_length),
         value = s.maxFilenameLength,
         valueRange = FilenameTemplate.MIN_LENGTH..FilenameTemplate.MAX_LENGTH,
         onValueChange = { vm.setStorage(s.copy(maxFilenameLength = it)) },
         valueLabel = { "$it chars" },
     )
-    PreferenceNote("Characters Android does not allow in filenames are removed or replaced automatically.")
-    SingleChoicePreference("Organize into subfolders", SubfolderOrganization.entries.toList(), s.subfolderOrganization) {
+    PreferenceNote(stringResource(R.string.characters_android_does_not_allow_in_filenames_are_removed_or_replaced))
+    SingleChoicePreference(stringResource(R.string.organize_into_subfolders), SubfolderOrganization.entries.toList(), s.subfolderOrganization) {
         vm.setStorage(s.copy(subfolderOrganization = it))
     }
 
-    PreferenceGroupTitle("Temporary files")
+    PreferenceGroupTitle(stringResource(R.string.temporary_files))
     val recoverable by produceState(initialValue = -1L, s) {
         value = vm.recoverableTempBytes()
     }
     var confirmClear by remember { mutableStateOf(false) }
     ClickablePreference(
-        title = "Clear temporary files",
+        title = stringResource(R.string.clear_temporary_files),
         subtitle = if (recoverable < 0) "Calculating…" else "Recoverable: ${FolderAccessManager.formatBytes(recoverable)}",
         onClick = { confirmClear = true },
     )
-    PreferenceNote("Clearing temporary files never deletes your completed downloads.")
+    PreferenceNote(stringResource(R.string.clearing_temporary_files_never_deletes_your_completed_downloads))
     if (confirmClear) {
         ConfirmDialog(
-            title = "Clear temporary files?",
-            message = "This removes intermediate and cache files only. Completed downloads are kept.",
-            confirmLabel = "Clear",
+            title = stringResource(R.string.clear_temporary_files_9fffa1),
+            message = stringResource(R.string.this_removes_intermediate_and_cache_files_only_completed_downloads_are),
+            confirmLabel = stringResource(R.string.clear),
             onConfirm = { scope.launch { vm.clearTempFiles() } },
             onDismiss = { confirmClear = false },
         )
@@ -219,82 +221,82 @@ private fun FolderRow(
 fun BehaviorSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     val b = settings.behavior
 
-    PreferenceGroupTitle("Queue")
-    SwitchPreference("Ask for confirmation before downloading", b.confirmBeforeDownload,
+    PreferenceGroupTitle(stringResource(R.string.queue))
+    SwitchPreference(stringResource(R.string.ask_for_confirmation_before_downloading), b.confirmBeforeDownload,
         subtitle = if (b.confirmBeforeDownload) "You'll confirm each download" else "Downloads start immediately") {
         vm.setBehavior(b.copy(confirmBeforeDownload = it))
     }
-    IntSliderPreference("Maximum simultaneous downloads", b.maxSimultaneousDownloads, 1..5,
+    IntSliderPreference(stringResource(R.string.maximum_simultaneous_downloads), b.maxSimultaneousDownloads, 1..5,
         onValueChange = { vm.setBehavior(b.copy(maxSimultaneousDownloads = it)) }, valueLabel = { "$it" })
-    IntSliderPreference("Maximum retries for failed downloads", b.maxRetryCount, 0..10,
+    IntSliderPreference(stringResource(R.string.maximum_retries_for_failed_downloads), b.maxRetryCount, 0..10,
         onValueChange = { vm.setBehavior(b.copy(maxRetryCount = it)) }, valueLabel = { "$it" })
-    SingleChoicePreference("Add new downloads to", QueuePosition.entries.toList(), b.newDownloadPosition) {
+    SingleChoicePreference(stringResource(R.string.add_new_downloads_to), QueuePosition.entries.toList(), b.newDownloadPosition) {
         vm.setBehavior(b.copy(newDownloadPosition = it))
     }
-    PreferenceNote("The parallel limit applies to newly started downloads; downloads already running are not interrupted.")
+    PreferenceNote(stringResource(R.string.the_parallel_limit_applies_to_newly_started_downloads_downloads_alread))
 
-    PreferenceGroupTitle("Resume & duplicates")
-    SwitchPreference("Automatically resume interrupted downloads", b.autoResumeInterrupted) {
+    PreferenceGroupTitle(stringResource(R.string.resume_and_duplicates))
+    SwitchPreference(stringResource(R.string.automatically_resume_interrupted_downloads), b.autoResumeInterrupted) {
         vm.setBehavior(b.copy(autoResumeInterrupted = it))
     }
-    SwitchPreference("Resume queued downloads after restart", b.resumeQueueAfterRestart) {
+    SwitchPreference(stringResource(R.string.resume_queued_downloads_after_restart), b.resumeQueueAfterRestart) {
         vm.setBehavior(b.copy(resumeQueueAfterRestart = it))
     }
-    SwitchPreference("Prevent duplicate downloads", b.preventDuplicates) {
+    SwitchPreference(stringResource(R.string.prevent_duplicate_downloads), b.preventDuplicates) {
         vm.setBehavior(b.copy(preventDuplicates = it))
     }
-    SingleChoicePreference("Duplicate detection method", DuplicateDetection.entries.toList(), b.duplicateDetection,
+    SingleChoicePreference(stringResource(R.string.duplicate_detection_method), DuplicateDetection.entries.toList(), b.duplicateDetection,
         enabled = b.preventDuplicates) {
         vm.setBehavior(b.copy(duplicateDetection = it))
     }
 
-    PreferenceGroupTitle("Power & thermal")
-    SwitchPreference("Keep the screen awake during downloads", b.keepScreenAwake) {
+    PreferenceGroupTitle(stringResource(R.string.power_and_thermal))
+    SwitchPreference(stringResource(R.string.keep_the_screen_awake_during_downloads), b.keepScreenAwake) {
         vm.setBehavior(b.copy(keepScreenAwake = it))
     }
-    SwitchPreference("Pause when battery saver is on", b.pauseOnBatterySaver) {
+    SwitchPreference(stringResource(R.string.pause_when_battery_saver_is_on), b.pauseOnBatterySaver) {
         vm.setBehavior(b.copy(pauseOnBatterySaver = it))
     }
-    SwitchPreference("Pause when the device is too hot", b.pauseOnOverheat,
-        subtitle = "When thermal status is available") {
+    SwitchPreference(stringResource(R.string.pause_when_the_device_is_too_hot), b.pauseOnOverheat,
+        subtitle = stringResource(R.string.when_thermal_status_is_available)) {
         vm.setBehavior(b.copy(pauseOnOverheat = it))
     }
-    SwitchPreference("Automatically retry when connectivity returns", b.autoRetryOnReconnect) {
+    SwitchPreference(stringResource(R.string.automatically_retry_when_connectivity_returns), b.autoRetryOnReconnect) {
         vm.setBehavior(b.copy(autoRetryOnReconnect = it))
     }
 
-    PreferenceGroupTitle("Limits & scheduling")
-    SwitchPreference("Limit download speed", b.speedLimitEnabled) {
+    PreferenceGroupTitle(stringResource(R.string.limits_and_scheduling))
+    SwitchPreference(stringResource(R.string.limit_download_speed), b.speedLimitEnabled) {
         vm.setBehavior(b.copy(speedLimitEnabled = it))
     }
     TextEntryPreference(
-        title = "Speed limit (KB/s)",
+        title = stringResource(R.string.speed_limit_kb_s),
         value = b.speedLimitKbps.toString(),
         onValueChange = { it.toIntOrNull()?.let { v -> vm.setBehavior(b.copy(speedLimitKbps = v)) } },
         enabled = b.speedLimitEnabled,
         keyboardNumeric = true,
         validate = { if ((it.toIntOrNull() ?: 0) < 1) "Enter a value of 1 or more" else null },
     )
-    SwitchPreference("Only download within a time window", b.scheduleEnabled) {
+    SwitchPreference(stringResource(R.string.only_download_within_a_time_window), b.scheduleEnabled) {
         vm.setBehavior(b.copy(scheduleEnabled = it))
     }
     TextEntryPreference(
-        title = "Window start (HH:MM)",
+        title = stringResource(R.string.window_start_hh_mm),
         value = formatMinutes(b.scheduleStartMinutes),
         onValueChange = { parseMinutes(it)?.let { m -> vm.setBehavior(b.copy(scheduleStartMinutes = m)) } },
         enabled = b.scheduleEnabled,
         validate = { if (parseMinutes(it) == null) "Use 24-hour HH:MM" else null },
     )
     TextEntryPreference(
-        title = "Window end (HH:MM)",
+        title = stringResource(R.string.window_end_hh_mm),
         value = formatMinutes(b.scheduleEndMinutes),
         onValueChange = { parseMinutes(it)?.let { m -> vm.setBehavior(b.copy(scheduleEndMinutes = m)) } },
         enabled = b.scheduleEnabled,
         validate = { if (parseMinutes(it) == null) "Use 24-hour HH:MM" else null },
     )
 
-    PreferenceGroupTitle("After completion")
-    SingleChoicePreference("When a download finishes", PostDownloadAction.entries.toList(), b.postDownloadAction) {
+    PreferenceGroupTitle(stringResource(R.string.after_completion))
+    SingleChoicePreference(stringResource(R.string.when_a_download_finishes), PostDownloadAction.entries.toList(), b.postDownloadAction) {
         vm.setBehavior(b.copy(postDownloadAction = it))
     }
 }
@@ -321,48 +323,48 @@ private fun parseMinutes(text: String): Int? {
 fun NetworkSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     val n = settings.network
 
-    PreferenceGroupTitle("Connectivity")
-    SingleChoicePreference("Allowed networks", NetworkType.entries.toList(), n.allowedNetworks) {
+    PreferenceGroupTitle(stringResource(R.string.connectivity))
+    SingleChoicePreference(stringResource(R.string.allowed_networks), NetworkType.entries.toList(), n.allowedNetworks) {
         vm.setNetwork(n.copy(allowedNetworks = it))
     }
-    SwitchPreference("Allow downloads while roaming", n.allowRoaming) {
+    SwitchPreference(stringResource(R.string.allow_downloads_while_roaming), n.allowRoaming) {
         vm.setNetwork(n.copy(allowRoaming = it))
     }
-    SwitchPreference("Confirm before using mobile data", n.confirmMobileData) {
+    SwitchPreference(stringResource(R.string.confirm_before_using_mobile_data), n.confirmMobileData) {
         vm.setNetwork(n.copy(confirmMobileData = it))
     }
     TextEntryPreference(
-        title = "Mobile-data warning threshold (MB)",
+        title = stringResource(R.string.mobile_data_warning_threshold_mb),
         value = n.mobileDataWarningMb.toString(),
         onValueChange = { it.toIntOrNull()?.let { v -> vm.setNetwork(n.copy(mobileDataWarningMb = v)) } },
         keyboardNumeric = true,
         validate = { if ((it.toIntOrNull() ?: 0) < 1) "Enter a value of 1 or more" else null },
     )
-    SwitchPreference("Treat metered Wi-Fi as mobile data", n.treatMeteredWifiAsMobile) {
+    SwitchPreference(stringResource(R.string.treat_metered_wi_fi_as_mobile_data), n.treatMeteredWifiAsMobile) {
         vm.setNetwork(n.copy(treatMeteredWifiAsMobile = it))
     }
-    SwitchPreference("Pause when the network changes", n.pauseOnNetworkChange) {
+    SwitchPreference(stringResource(R.string.pause_when_the_network_changes), n.pauseOnNetworkChange) {
         vm.setNetwork(n.copy(pauseOnNetworkChange = it))
     }
-    SwitchPreference("Retry automatically after connection loss", n.retryAfterConnectionLoss) {
+    SwitchPreference(stringResource(R.string.retry_automatically_after_connection_loss), n.retryAfterConnectionLoss) {
         vm.setNetwork(n.copy(retryAfterConnectionLoss = it))
     }
-    PreferenceNote("If a network setting blocks a download, the app explains which one and offers to open the relevant settings.")
+    PreferenceNote(stringResource(R.string.if_a_network_setting_blocks_a_download_the_app_explains_which_one_and))
 
-    PreferenceGroupTitle("Proxy")
+    PreferenceGroupTitle(stringResource(R.string.proxy))
     val proxyEnabled = n.proxyType != ProxyType.DISABLED
-    SingleChoicePreference("Proxy", ProxyType.entries.toList(), n.proxyType) {
+    SingleChoicePreference(stringResource(R.string.proxy), ProxyType.entries.toList(), n.proxyType) {
         vm.setNetwork(n.copy(proxyType = it))
     }
     TextEntryPreference(
-        title = "Host",
+        title = stringResource(R.string.host),
         value = n.proxyHost,
         onValueChange = { vm.setNetwork(n.copy(proxyHost = it.trim())) },
         enabled = proxyEnabled,
         validate = { if (it.isNotBlank() && !ProxyValidator.isValidHost(it)) "Enter a valid host or IP" else null },
     )
     TextEntryPreference(
-        title = "Port",
+        title = stringResource(R.string.port),
         value = if (n.proxyPort == 0) "" else n.proxyPort.toString(),
         onValueChange = { vm.setNetwork(n.copy(proxyPort = it.toIntOrNull() ?: 0)) },
         enabled = proxyEnabled,
@@ -371,26 +373,26 @@ fun NetworkSectionContent(settings: AppSettings, vm: SettingsViewModel) {
         validate = { val p = it.toIntOrNull(); if (p == null || p !in 1..65535) "Port must be 1-65535" else null },
     )
     TextEntryPreference(
-        title = "Username (optional)",
+        title = stringResource(R.string.username_optional),
         value = n.proxyUsername,
         onValueChange = { vm.setNetwork(n.copy(proxyUsername = it)) },
         enabled = proxyEnabled,
     )
     TextEntryPreference(
-        title = "Password (optional)",
+        title = stringResource(R.string.password_optional),
         value = "",
         onValueChange = { vm.setProxyPassword(it) },
         summary = if (n.proxyPasswordSet) "•••••• (stored securely)" else "Not set",
         enabled = proxyEnabled,
         isPassword = true,
     )
-    PreferenceNote("Proxy passwords are stored using Android Keystore-backed encryption and are never shown or exported.")
+    PreferenceNote(stringResource(R.string.proxy_passwords_are_stored_using_android_keystore_backed_encryption_an))
 
     // Test connection
     val scope = rememberCoroutineScope()
     var testResult by remember { mutableStateOf<String?>(null) }
     ClickablePreference(
-        title = "Test connection",
+        title = stringResource(R.string.test_connection),
         subtitle = testResult,
         enabled = proxyEnabled && ProxyValidator.isValidHost(n.proxyHost) && ProxyValidator.isValidPort(n.proxyPort),
         onClick = {
@@ -422,23 +424,23 @@ fun SubtitlesSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     val languages = LanguageManager.SUPPORTED.drop(1).map { it.tag to it.display }
     val fallbackLanguages = listOf("" to "None") + languages
 
-    SwitchPreference("Download subtitles when available", sub.downloadSubtitles) {
+    SwitchPreference(stringResource(R.string.download_subtitles_when_available), sub.downloadSubtitles) {
         vm.setSubtitles(sub.copy(downloadSubtitles = it))
     }
-    LabeledChoicePreference("Preferred language", languages, sub.preferredLanguage,
+    LabeledChoicePreference(stringResource(R.string.preferred_language), languages, sub.preferredLanguage,
         enabled = enabled) { vm.setSubtitles(sub.copy(preferredLanguage = it)) }
-    LabeledChoicePreference("Fallback language", fallbackLanguages, sub.fallbackLanguage,
+    LabeledChoicePreference(stringResource(R.string.fallback_language), fallbackLanguages, sub.fallbackLanguage,
         enabled = enabled) { vm.setSubtitles(sub.copy(fallbackLanguage = it)) }
-    SingleChoicePreference("Subtitle type", SubtitleTypePreference.entries.toList(), sub.subtitleType,
+    SingleChoicePreference(stringResource(R.string.subtitle_type), SubtitleTypePreference.entries.toList(), sub.subtitleType,
         enabled = enabled) { vm.setSubtitles(sub.copy(subtitleType = it)) }
-    SingleChoicePreference("Subtitle format", SubtitleFormat.entries.toList(), sub.format,
+    SingleChoicePreference(stringResource(R.string.subtitle_format), SubtitleFormat.entries.toList(), sub.format,
         enabled = enabled) { vm.setSubtitles(sub.copy(format = it)) }
-    SwitchPreference("Embed subtitles in supported video", sub.embedInVideo,
+    SwitchPreference(stringResource(R.string.embed_subtitles_in_supported_video), sub.embedInVideo,
         enabled = enabled) { vm.setSubtitles(sub.copy(embedInVideo = it)) }
-    SwitchPreference("Also save subtitles as separate files", sub.saveAsSeparateFiles,
+    SwitchPreference(stringResource(R.string.also_save_subtitles_as_separate_files), sub.saveAsSeparateFiles,
         enabled = enabled) { vm.setSubtitles(sub.copy(saveAsSeparateFiles = it)) }
-    SwitchPreference("Include all available languages", sub.includeAllLanguages,
+    SwitchPreference(stringResource(R.string.include_all_available_languages), sub.includeAllLanguages,
         enabled = enabled) { vm.setSubtitles(sub.copy(includeAllLanguages = it)) }
-    SwitchPreference("Add language codes to filenames", sub.addLanguageCodeToFilename,
+    SwitchPreference(stringResource(R.string.add_language_codes_to_filenames), sub.addLanguageCodeToFilename,
         enabled = enabled) { vm.setSubtitles(sub.copy(addLanguageCodeToFilename = it)) }
 }

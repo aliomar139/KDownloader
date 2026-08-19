@@ -22,6 +22,17 @@ None yet.
 - Gates: `assembleDebug`, `testDebugUnitTest` (65 passed), and `verifyBundledYtDlp` passed before and after deleting the `.kts` scripts.
 - Connected-device and manual gates: skipped because no device or emulator is connected.
 
+## Phase 2 — Java and Views foundations
+
+- Added the approved Android Views dependency set needed by later screen phases; Room remains on KSP until phase 4 as required.
+- Added `AppExecutors` and `StateHolder` as the Java executor and observable-state foundations.
+- Reparented `Theme.KDownloader` to Material 3 and ported the Compose light/dark palette, high-contrast overlay, typography, and shape sizes to resources.
+- Added 35 vector drawables from Google's official Material icon source, matching the filled/outlined variants used by the Compose UI.
+- Extracted 365 distinct static UI texts into resources (366 total strings including `app_name`) and replaced 246 direct Compose text/title/subtitle/accessibility call sites.
+- Approved deviation: UI string literals moved to `strings.xml` with identical text. Indirect model labels and formatted strings remain represented by their existing Kotlin values until their owning Java/View phase converts the call site.
+- Gates: clean `assembleDebug` and `testDebugUnitTest` passed (65 tests, 0 failures); `verifyBundledYtDlp` ran through `preBuild`.
+- Connected-device and manual visual-parity gates: skipped because no device or emulator is connected.
+
 ## Kotlin-library Java interop adaptations
 
 None yet.

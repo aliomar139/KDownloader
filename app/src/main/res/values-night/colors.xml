@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="theme_primary">@color/red_300</color>
+    <color name="theme_on_primary">@color/red_900</color>
+    <color name="theme_primary_container">@color/red_600</color>
+    <color name="theme_on_primary_container">@color/red_container_light</color>
+    <color name="theme_inverse_primary">@color/red_600</color>
+    <color name="theme_secondary">@color/terracotta_300</color>
+    <color name="theme_on_secondary">@color/terracotta_900</color>
+    <color name="theme_secondary_container">@color/terracotta_600</color>
+    <color name="theme_on_secondary_container">@color/terracotta_container_light</color>
+    <color name="theme_tertiary">@color/emerald_400</color>
+    <color name="theme_on_tertiary">@color/emerald_950</color>
+    <color name="theme_tertiary_container">@color/emerald_900</color>
+    <color name="theme_on_tertiary_container">@color/emerald_container_light</color>
+    <color name="theme_error">@color/error_red_400</color>
+    <color name="theme_on_error">@color/error_red_900</color>
+    <color name="theme_error_container">@color/error_red_600</color>
+    <color name="theme_on_error_container">@color/error_container_light</color>
+    <color name="theme_background">@color/neutral_950</color>
+    <color name="theme_on_background">@color/neutral_200</color>
+    <color name="theme_surface">@color/neutral_900</color>
+    <color name="theme_on_surface">@color/neutral_100</color>
+    <color name="theme_surface_variant">@color/neutral_800</color>
+    <color name="theme_on_surface_variant">@color/neutral_400</color>
+    <color name="theme_surface_container_lowest">@color/neutral_950</color>
+    <color name="theme_surface_container_low">#141414</color>
+    <color name="theme_surface_container">#1C1C1C</color>
+    <color name="theme_surface_container_high">#232323</color>
+    <color name="theme_surface_container_highest">#2C2C2C</color>
+    <color name="theme_outline">#4D4D4D</color>
+    <color name="theme_outline_variant">@color/neutral_800</color>
+    <color name="theme_inverse_surface">@color/neutral_200</color>
+    <color name="theme_inverse_on_surface">@color/neutral_900</color>
+    <color name="theme_scrim">#000000</color>
+
+    <color name="high_contrast_background">#000000</color>
+    <color name="high_contrast_on_background">#FFFFFF</color>
+    <color name="high_contrast_surface">#000000</color>
+    <color name="high_contrast_on_surface">#FFFFFF</color>
+    <color name="high_contrast_surface_variant">#1A1A1A</color>
+    <color name="high_contrast_on_surface_variant">#EDEDED</color>
+    <color name="high_contrast_outline">#BFBFBF</color>
+</resources>

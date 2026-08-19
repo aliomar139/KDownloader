@@ -1,5 +1,7 @@
 package com.kira.kdownloader.settings.ui
 
+import androidx.compose.ui.res.stringResource
+import com.kira.kdownloader.R
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -59,36 +61,36 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
     val back = { route = Route.HOME }
     when (route) {
         Route.HOME -> SettingsHome(onNavigate = { route = it })
-        Route.DOWNLOAD -> SectionScaffold("Download preferences", back) { DownloadSectionContent(settings, viewModel) }
-        Route.STORAGE -> SectionScaffold("Storage & files", back) { StorageSectionContent(settings, viewModel) }
-        Route.BEHAVIOR -> SectionScaffold("Download behavior", back) { BehaviorSectionContent(settings, viewModel) }
-        Route.NETWORK -> SectionScaffold("Network", back) { NetworkSectionContent(settings, viewModel) }
-        Route.SUBTITLES -> SectionScaffold("Subtitles & captions", back) { SubtitlesSectionContent(settings, viewModel) }
-        Route.NOTIFICATIONS -> SectionScaffold("Notifications", back) { NotificationsSectionContent(settings, viewModel) }
-        Route.APPEARANCE -> SectionScaffold("Appearance & accessibility", back) { AppearanceSectionContent(settings, viewModel) }
-        Route.HISTORY -> SectionScaffold("History & privacy", back) { HistoryPrivacySectionContent(settings, viewModel) }
-        Route.ADVANCED -> SectionScaffold("Advanced processing", back) { AdvancedSectionContent(settings, viewModel) }
-        Route.PERMISSIONS -> SectionScaffold("Permissions & status", back) { PermissionsSectionContent(status, viewModel) }
-        Route.ABOUT -> SectionScaffold("About & support", back) { AboutSectionContent() }
-        Route.RESET -> SectionScaffold("Reset", back) { ResetSectionContent(viewModel) }
+        Route.DOWNLOAD -> SectionScaffold(stringResource(R.string.download_preferences), back) { DownloadSectionContent(settings, viewModel) }
+        Route.STORAGE -> SectionScaffold(stringResource(R.string.storage_and_files), back) { StorageSectionContent(settings, viewModel) }
+        Route.BEHAVIOR -> SectionScaffold(stringResource(R.string.download_behavior), back) { BehaviorSectionContent(settings, viewModel) }
+        Route.NETWORK -> SectionScaffold(stringResource(R.string.network), back) { NetworkSectionContent(settings, viewModel) }
+        Route.SUBTITLES -> SectionScaffold(stringResource(R.string.subtitles_and_captions), back) { SubtitlesSectionContent(settings, viewModel) }
+        Route.NOTIFICATIONS -> SectionScaffold(stringResource(R.string.notifications), back) { NotificationsSectionContent(settings, viewModel) }
+        Route.APPEARANCE -> SectionScaffold(stringResource(R.string.appearance_and_accessibility), back) { AppearanceSectionContent(settings, viewModel) }
+        Route.HISTORY -> SectionScaffold(stringResource(R.string.history_and_privacy), back) { HistoryPrivacySectionContent(settings, viewModel) }
+        Route.ADVANCED -> SectionScaffold(stringResource(R.string.advanced_processing), back) { AdvancedSectionContent(settings, viewModel) }
+        Route.PERMISSIONS -> SectionScaffold(stringResource(R.string.permissions_and_status), back) { PermissionsSectionContent(status, viewModel) }
+        Route.ABOUT -> SectionScaffold(stringResource(R.string.about_and_support), back) { AboutSectionContent() }
+        Route.RESET -> SectionScaffold(stringResource(R.string.reset), back) { ResetSectionContent(viewModel) }
     }
 }
 
 @Composable
 private fun SettingsHome(onNavigate: (Route) -> Unit) {
-    SectionScaffold(title = "Settings", onBack = null) {
-        Category("Download preferences", "Type, format, quality, metadata", Icons.Filled.VideoLibrary) { onNavigate(Route.DOWNLOAD) }
-        Category("Storage & files", "Folders, filenames, temporary files", Icons.Filled.Storage) { onNavigate(Route.STORAGE) }
-        Category("Download behavior", "Queue, retries, power, scheduling", Icons.Filled.PlayArrow) { onNavigate(Route.BEHAVIOR) }
-        Category("Network", "Allowed networks, mobile data, proxy", Icons.Filled.Wifi) { onNavigate(Route.NETWORK) }
-        Category("Subtitles & captions", "Languages, type, format, embedding", Icons.Filled.Subtitles) { onNavigate(Route.SUBTITLES) }
-        Category("Notifications", "Progress, completion, actions", Icons.Filled.Notifications) { onNavigate(Route.NOTIFICATIONS) }
-        Category("Appearance & accessibility", "Theme, language, list, motion", Icons.Filled.Palette) { onNavigate(Route.APPEARANCE) }
-        Category("History & privacy", "Retention, clearing, export/import", Icons.Filled.History) { onNavigate(Route.HISTORY) }
-        Category("Advanced processing", "Conversion, hardware, logging", Icons.Filled.Tune) { onNavigate(Route.ADVANCED) }
-        Category("Permissions & status", "Notifications, battery, background", Icons.Filled.Security) { onNavigate(Route.PERMISSIONS) }
-        Category("Reset", "Restore settings to defaults", Icons.Filled.RestartAlt) { onNavigate(Route.RESET) }
-        Category("About & support", "Version, licenses, help", Icons.Filled.Info) { onNavigate(Route.ABOUT) }
+    SectionScaffold(title = stringResource(R.string.settings), onBack = null) {
+        Category(stringResource(R.string.download_preferences), stringResource(R.string.type_format_quality_metadata), Icons.Filled.VideoLibrary) { onNavigate(Route.DOWNLOAD) }
+        Category(stringResource(R.string.storage_and_files), stringResource(R.string.folders_filenames_temporary_files), Icons.Filled.Storage) { onNavigate(Route.STORAGE) }
+        Category(stringResource(R.string.download_behavior), stringResource(R.string.queue_retries_power_scheduling), Icons.Filled.PlayArrow) { onNavigate(Route.BEHAVIOR) }
+        Category(stringResource(R.string.network), stringResource(R.string.allowed_networks_mobile_data_proxy), Icons.Filled.Wifi) { onNavigate(Route.NETWORK) }
+        Category(stringResource(R.string.subtitles_and_captions), stringResource(R.string.languages_type_format_embedding), Icons.Filled.Subtitles) { onNavigate(Route.SUBTITLES) }
+        Category(stringResource(R.string.notifications), stringResource(R.string.progress_completion_actions), Icons.Filled.Notifications) { onNavigate(Route.NOTIFICATIONS) }
+        Category(stringResource(R.string.appearance_and_accessibility), stringResource(R.string.theme_language_list_motion), Icons.Filled.Palette) { onNavigate(Route.APPEARANCE) }
+        Category(stringResource(R.string.history_and_privacy), stringResource(R.string.retention_clearing_export_import), Icons.Filled.History) { onNavigate(Route.HISTORY) }
+        Category(stringResource(R.string.advanced_processing), stringResource(R.string.conversion_hardware_logging), Icons.Filled.Tune) { onNavigate(Route.ADVANCED) }
+        Category(stringResource(R.string.permissions_and_status), stringResource(R.string.notifications_battery_background), Icons.Filled.Security) { onNavigate(Route.PERMISSIONS) }
+        Category(stringResource(R.string.reset), stringResource(R.string.restore_settings_to_defaults), Icons.Filled.RestartAlt) { onNavigate(Route.RESET) }
+        Category(stringResource(R.string.about_and_support), stringResource(R.string.version_licenses_help), Icons.Filled.Info) { onNavigate(Route.ABOUT) }
     }
 }
 
@@ -112,7 +114,7 @@ fun SectionScaffold(
                 navigationIcon = {
                     if (onBack != null) {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                         }
                     }
                 },

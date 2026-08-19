@@ -82,9 +82,9 @@ class MainActivity : ComponentActivity() {
         requestRuntimePermissions()
 
         val tabs = listOf(
-            TabSpec("Home", Icons.Filled.Home, Icons.Outlined.Home),
-            TabSpec("History", Icons.Filled.History, Icons.Outlined.History),
-            TabSpec("Settings", Icons.Filled.Settings, Icons.Outlined.Settings),
+            TabSpec(getString(R.string.home), Icons.Filled.Home, Icons.Outlined.Home),
+            TabSpec(getString(R.string.history), Icons.Filled.History, Icons.Outlined.History),
+            TabSpec(getString(R.string.settings), Icons.Filled.Settings, Icons.Outlined.Settings),
         )
 
         setContent {

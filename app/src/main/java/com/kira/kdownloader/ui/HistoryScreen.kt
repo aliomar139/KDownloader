@@ -1,5 +1,7 @@
 package com.kira.kdownloader.ui
 
+import androidx.compose.ui.res.stringResource
+import com.kira.kdownloader.R
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -179,7 +181,7 @@ fun HistoryScreen(
                     tint = MaterialTheme.colorScheme.error,
                 )
             },
-            title = { Text("Clear all history?") },
+            title = { Text(stringResource(R.string.clear_all_history_cf155c)) },
             text = {
                 Text(
                     "This removes every entry from your history. The downloaded files themselves " +
@@ -196,10 +198,10 @@ fun HistoryScreen(
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.error,
                     ),
-                ) { Text("Clear all") }
+                ) { Text(stringResource(R.string.clear_all)) }
             },
             dismissButton = {
-                TextButton(onClick = { showClearAll = false }) { Text("Cancel") }
+                TextButton(onClick = { showClearAll = false }) { Text(stringResource(R.string.cancel)) }
             },
         )
     }
@@ -260,7 +262,7 @@ fun HistoryScreen(
         Spacer(Modifier.height(20.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("History", style = MaterialTheme.typography.headlineSmall)
+                Text(stringResource(R.string.history), style = MaterialTheme.typography.headlineSmall)
                 Text(
                     if (history.isEmpty()) {
                         "No downloads yet"
@@ -278,13 +280,13 @@ fun HistoryScreen(
                     IconButton(onClick = { menuOpen = true }) {
                         Icon(
                             Icons.Default.MoreVert,
-                            contentDescription = "More options",
+                            contentDescription = stringResource(R.string.more_options),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         DropdownMenuItem(
-                            text = { Text("Clear all history") },
+                            text = { Text(stringResource(R.string.clear_all_history)) },
                             onClick = {
                                 menuOpen = false
                                 showClearAll = true
@@ -369,14 +371,14 @@ private fun HistoryToolbar(
             value = query,
             onValueChange = onQueryChange,
             singleLine = true,
-            placeholder = { Text("Search downloads") },
+            placeholder = { Text(stringResource(R.string.search_downloads)) },
             leadingIcon = {
                 Icon(Icons.Outlined.Search, contentDescription = null)
             },
             trailingIcon = {
                 if (query.isNotBlank()) {
                     IconButton(onClick = { onQueryChange("") }) {
-                        Icon(Icons.Outlined.Close, contentDescription = "Clear search")
+                        Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.clear_search))
                     }
                 }
             },
@@ -391,17 +393,17 @@ private fun HistoryToolbar(
             FilterChip(
                 selected = filter == HistoryFilter.ALL,
                 onClick = { onFilterChange(HistoryFilter.ALL) },
-                label = { Text("All") },
+                label = { Text(stringResource(R.string.all)) },
             )
             FilterChip(
                 selected = filter == HistoryFilter.VIDEO,
                 onClick = { onFilterChange(HistoryFilter.VIDEO) },
-                label = { Text("Video") },
+                label = { Text(stringResource(R.string.video)) },
             )
             FilterChip(
                 selected = filter == HistoryFilter.AUDIO,
                 onClick = { onFilterChange(HistoryFilter.AUDIO) },
-                label = { Text("Audio") },
+                label = { Text(stringResource(R.string.audio)) },
             )
             Spacer(Modifier.weight(1f))
             IconButton(onClick = onToggleSort) {
@@ -456,7 +458,7 @@ private fun shareDownload(context: Context, download: DownloadEntity) {
         context.startActivity(Intent.createChooser(shareIntent, "Share"))
     } catch (error: Throwable) {
         Log.w("HistoryScreen", "Could not share ${download.title}", error)
-        Toast.makeText(context, "No app available to share this file", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.no_app_available_to_share_this_file), Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -487,7 +489,7 @@ private fun DeleteDownloadDialog(
                 tint = MaterialTheme.colorScheme.error,
             )
         },
-        title = { Text("Delete download?") },
+        title = { Text(stringResource(R.string.delete_download)) },
         text = {
             Column {
                 Text(
@@ -530,10 +532,10 @@ private fun DeleteDownloadDialog(
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = MaterialTheme.colorScheme.error,
                 ),
-            ) { Text("Delete") }
+            ) { Text(stringResource(R.string.delete)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
     )
 }
@@ -541,7 +543,7 @@ private fun DeleteDownloadDialog(
 private fun openDownload(context: Context, download: DownloadEntity) {
     val fileUri = download.fileUri
     if (fileUri.isNullOrBlank()) {
-        Toast.makeText(context, "This download has no saved file", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.this_download_has_no_saved_file), Toast.LENGTH_SHORT).show()
         return
     }
     val mimeType = if (download.kind == "AUDIO") "audio/*" else "video/*"
@@ -557,7 +559,7 @@ private fun openDownload(context: Context, download: DownloadEntity) {
         context.startActivity(Intent.createChooser(viewIntent, "Open with"))
     } catch (error: Throwable) {
         Log.w("HistoryScreen", "Could not open ${download.title}", error)
-        Toast.makeText(context, "Couldn't open this file", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.couldn_t_open_this_file), Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -582,7 +584,7 @@ private fun EmptyHistory() {
                 )
             }
             Spacer(Modifier.height(16.dp))
-            Text("Nothing here yet", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.nothing_here_yet), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(6.dp))
             Text(
                 "Files you download will show up here\nand in Download/KDownloader.",

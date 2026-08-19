@@ -1,5 +1,7 @@
 package com.kira.kdownloader.settings.ui
 
+import androidx.compose.ui.res.stringResource
+import com.kira.kdownloader.R
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -40,7 +42,7 @@ import kotlinx.coroutines.withContext
 private fun launchIntent(context: Context, intent: Intent) {
     val toLaunch = if (context !is Activity) intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) else intent
     runCatching { context.startActivity(toLaunch) }
-        .onFailure { Toast.makeText(context, "No app can handle this action", Toast.LENGTH_SHORT).show() }
+        .onFailure { Toast.makeText(context, context.getString(R.string.no_app_can_handle_this_action), Toast.LENGTH_SHORT).show() }
 }
 
 // ---------------------------------------------------------------------------
@@ -58,41 +60,41 @@ fun NotificationsSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     ) { vm.refreshStatus() }
 
     if (!enabled) {
-        PreferenceNote("Notifications are turned off for this app, so progress and completion alerts won't appear.")
+        PreferenceNote(stringResource(R.string.notifications_are_turned_off_for_this_app_so_progress_and_completion_a))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ClickablePreference("Allow notifications", onClick = {
+            ClickablePreference(stringResource(R.string.allow_notifications), onClick = {
                 permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
             })
         }
-        ClickablePreference("Open Android notification settings", onClick = {
+        ClickablePreference(stringResource(R.string.open_android_notification_settings), onClick = {
             launchIntent(context, vm.system.notificationSettingsIntent())
         })
     }
 
-    PreferenceGroupTitle("Alerts")
-    SwitchPreference("Show download progress notifications", nt.showProgress) {
+    PreferenceGroupTitle(stringResource(R.string.alerts))
+    SwitchPreference(stringResource(R.string.show_download_progress_notifications), nt.showProgress) {
         vm.setNotifications(nt.copy(showProgress = it))
     }
-    SwitchPreference("Notify when a download completes", nt.notifyOnEachComplete) {
+    SwitchPreference(stringResource(R.string.notify_when_a_download_completes), nt.notifyOnEachComplete) {
         vm.setNotifications(nt.copy(notifyOnEachComplete = it))
     }
-    SwitchPreference("Notify when all downloads complete", nt.notifyOnAllComplete) {
+    SwitchPreference(stringResource(R.string.notify_when_all_downloads_complete), nt.notifyOnAllComplete) {
         vm.setNotifications(nt.copy(notifyOnAllComplete = it))
     }
-    SwitchPreference("Notify when a download fails", nt.notifyOnFailure) {
+    SwitchPreference(stringResource(R.string.notify_when_a_download_fails), nt.notifyOnFailure) {
         vm.setNotifications(nt.copy(notifyOnFailure = it))
     }
 
-    PreferenceGroupTitle("Style")
-    SwitchPreference("Notification sound", nt.sound) { vm.setNotifications(nt.copy(sound = it)) }
-    SwitchPreference("Vibration", nt.vibration) { vm.setNotifications(nt.copy(vibration = it)) }
-    SwitchPreference("Show Pause / Resume / Cancel actions", nt.showActions) {
+    PreferenceGroupTitle(stringResource(R.string.style))
+    SwitchPreference(stringResource(R.string.notification_sound), nt.sound) { vm.setNotifications(nt.copy(sound = it)) }
+    SwitchPreference(stringResource(R.string.vibration), nt.vibration) { vm.setNotifications(nt.copy(vibration = it)) }
+    SwitchPreference(stringResource(R.string.show_pause_resume_cancel_actions), nt.showActions) {
         vm.setNotifications(nt.copy(showActions = it))
     }
-    SwitchPreference("Group multiple notifications", nt.groupNotifications) {
+    SwitchPreference(stringResource(R.string.group_multiple_notifications), nt.groupNotifications) {
         vm.setNotifications(nt.copy(groupNotifications = it))
     }
-    ClickablePreference("Open Android notification settings", onClick = {
+    ClickablePreference(stringResource(R.string.open_android_notification_settings), onClick = {
         launchIntent(context, vm.system.notificationSettingsIntent())
     })
 }
@@ -106,46 +108,46 @@ fun AppearanceSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     val a = settings.appearance
     val dynamicSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
-    PreferenceGroupTitle("Theme")
-    SingleChoicePreference("App theme", AppTheme.entries.toList(), a.theme) {
+    PreferenceGroupTitle(stringResource(R.string.theme))
+    SingleChoicePreference(stringResource(R.string.app_theme), AppTheme.entries.toList(), a.theme) {
         vm.setAppearance(a.copy(theme = it))
     }
-    SwitchPreference("Dynamic color", a.dynamicColor,
+    SwitchPreference(stringResource(R.string.dynamic_color), a.dynamicColor,
         subtitle = if (dynamicSupported) "Use colors from your wallpaper" else "Requires Android 12 or newer",
         enabled = dynamicSupported) {
         vm.setAppearance(a.copy(dynamicColor = it))
     }
-    SwitchPreference("High-contrast mode", a.highContrast) {
+    SwitchPreference(stringResource(R.string.high_contrast_mode), a.highContrast) {
         vm.setAppearance(a.copy(highContrast = it))
     }
 
-    PreferenceGroupTitle("Language")
+    PreferenceGroupTitle(stringResource(R.string.language))
     LabeledChoicePreference(
-        title = "App language",
+        title = stringResource(R.string.app_language),
         options = LanguageManager.SUPPORTED.map { it.tag to it.display },
         selectedValue = a.languageTag,
     ) { vm.setAppearance(a.copy(languageTag = it)) }
-    PreferenceNote("Language and theme changes are applied right away and keep your place in the app.")
+    PreferenceNote(stringResource(R.string.language_and_theme_changes_are_applied_right_away_and_keep_your_place))
 
-    PreferenceGroupTitle("Download list")
-    SwitchPreference("Compact download-list mode", a.compactList) {
+    PreferenceGroupTitle(stringResource(R.string.download_list))
+    SwitchPreference(stringResource(R.string.compact_download_list_mode), a.compactList) {
         vm.setAppearance(a.copy(compactList = it))
     }
-    SwitchPreference("Show file size estimates", a.showFileSize) {
+    SwitchPreference(stringResource(R.string.show_file_size_estimates), a.showFileSize) {
         vm.setAppearance(a.copy(showFileSize = it))
     }
-    SwitchPreference("Show download speed", a.showSpeed) {
+    SwitchPreference(stringResource(R.string.show_download_speed), a.showSpeed) {
         vm.setAppearance(a.copy(showSpeed = it))
     }
-    SwitchPreference("Show estimated time remaining", a.showEta) {
+    SwitchPreference(stringResource(R.string.show_estimated_time_remaining), a.showEta) {
         vm.setAppearance(a.copy(showEta = it))
     }
 
-    PreferenceGroupTitle("Motion")
-    SwitchPreference("Reduce animations", a.reduceAnimations) {
+    PreferenceGroupTitle(stringResource(R.string.motion))
+    SwitchPreference(stringResource(R.string.reduce_animations), a.reduceAnimations) {
         vm.setAppearance(a.copy(reduceAnimations = it))
     }
-    PreferenceNote("Text size follows your Android system accessibility settings.")
+    PreferenceNote(stringResource(R.string.text_size_follows_your_android_system_accessibility_settings))
 }
 
 // ---------------------------------------------------------------------------
@@ -158,21 +160,21 @@ fun HistoryPrivacySectionContent(settings: AppSettings, vm: SettingsViewModel) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    PreferenceGroupTitle("History")
-    SwitchPreference("Keep download history", h.keepHistory) {
+    PreferenceGroupTitle(stringResource(R.string.history))
+    SwitchPreference(stringResource(R.string.keep_download_history), h.keepHistory) {
         vm.setHistory(h.copy(keepHistory = it))
     }
-    SingleChoicePreference("History retention", HistoryRetention.entries.toList(), h.retention,
+    SingleChoicePreference(stringResource(R.string.history_retention), HistoryRetention.entries.toList(), h.retention,
         enabled = h.keepHistory) { vm.setHistory(h.copy(retention = it)) }
-    SwitchPreference("Save recently used URLs", h.saveRecentUrls) {
+    SwitchPreference(stringResource(R.string.save_recently_used_urls), h.saveRecentUrls) {
         vm.setHistory(h.copy(saveRecentUrls = it))
     }
-    SwitchPreference("Save search history", h.saveSearchHistory) {
+    SwitchPreference(stringResource(R.string.save_search_history), h.saveSearchHistory) {
         vm.setHistory(h.copy(saveSearchHistory = it))
     }
-    PreferenceNote("Clearing history never deletes your downloaded media.")
+    PreferenceNote(stringResource(R.string.clearing_history_never_deletes_your_downloaded_media))
 
-    PreferenceGroupTitle("Clear")
+    PreferenceGroupTitle(stringResource(R.string.clear))
     ConfirmingAction("Clear download history", "Remove all history entries. Downloaded files are kept.", "Clear") {
         vm.clearHistory()
     }
@@ -183,12 +185,12 @@ fun HistoryPrivacySectionContent(settings: AppSettings, vm: SettingsViewModel) {
         vm.clearSearchHistory()
     }
     ConfirmingAction(
-        title = "Clear all app data",
-        message = "Resets every setting, clears history, recent URLs, searches, and caches. Your downloaded media files are NOT deleted.",
-        confirmLabel = "Clear everything",
+        title = stringResource(R.string.clear_all_app_data),
+        message = stringResource(R.string.resets_every_setting_clears_history_recent_urls_searches_and_caches_yo),
+        confirmLabel = stringResource(R.string.clear_everything),
     ) { vm.clearAllAppData() }
 
-    PreferenceGroupTitle("Backup")
+    PreferenceGroupTitle(stringResource(R.string.backup))
     val exporter = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json"),
     ) { uri ->
@@ -216,9 +218,9 @@ fun HistoryPrivacySectionContent(settings: AppSettings, vm: SettingsViewModel) {
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
     }
-    ClickablePreference("Export settings to a file", onClick = { exporter.launch("kdownloader-settings.json") })
-    ClickablePreference("Import settings from a file", onClick = { importer.launch(arrayOf("application/json", "text/*")) })
-    PreferenceNote("Exported files never contain passwords, tokens, or other credentials.")
+    ClickablePreference(stringResource(R.string.export_settings_to_a_file), onClick = { exporter.launch("kdownloader-settings.json") })
+    ClickablePreference(stringResource(R.string.import_settings_from_a_file), onClick = { importer.launch(arrayOf("application/json", "text/*")) })
+    PreferenceNote(stringResource(R.string.exported_files_never_contain_passwords_tokens_or_other_credentials))
 }
 
 // ---------------------------------------------------------------------------
@@ -232,32 +234,32 @@ fun AdvancedSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     val scope = rememberCoroutineScope()
     val on = p.enableConversion
 
-    PreferenceGroupTitle("Conversion")
-    SwitchPreference("Enable post-download conversion", p.enableConversion) {
+    PreferenceGroupTitle(stringResource(R.string.conversion))
+    SwitchPreference(stringResource(R.string.enable_post_download_conversion), p.enableConversion) {
         vm.setProcessing(p.copy(enableConversion = it))
     }
-    SwitchPreference("Delete source files after successful conversion", p.deleteSourceAfterConversion,
+    SwitchPreference(stringResource(R.string.delete_source_files_after_successful_conversion), p.deleteSourceAfterConversion,
         enabled = on) { vm.setProcessing(p.copy(deleteSourceAfterConversion = it)) }
-    SwitchPreference("Preserve source files when conversion fails", p.preserveSourceOnFailure,
+    SwitchPreference(stringResource(R.string.preserve_source_files_when_conversion_fails), p.preserveSourceOnFailure,
         enabled = on) { vm.setProcessing(p.copy(preserveSourceOnFailure = it)) }
-    SwitchPreference("Prefer hardware acceleration when supported", p.preferHardwareAcceleration,
+    SwitchPreference(stringResource(R.string.prefer_hardware_acceleration_when_supported), p.preferHardwareAcceleration,
         enabled = on) { vm.setProcessing(p.copy(preferHardwareAcceleration = it)) }
-    SingleChoicePreference("Processing priority", ProcessingPriority.entries.toList(), p.priority,
+    SingleChoicePreference(stringResource(R.string.processing_priority), ProcessingPriority.entries.toList(), p.priority,
         enabled = on) { vm.setProcessing(p.copy(priority = it)) }
-    SwitchPreference("Allow processing in the background", p.allowBackgroundProcessing,
+    SwitchPreference(stringResource(R.string.allow_processing_in_the_background), p.allowBackgroundProcessing,
         enabled = on) { vm.setProcessing(p.copy(allowBackgroundProcessing = it)) }
     TextEntryPreference(
-        title = "Maximum temporary-storage (MB)",
+        title = stringResource(R.string.maximum_temporary_storage_mb),
         value = p.maxTempStorageMb.toString(),
         onValueChange = { it.toIntOrNull()?.let { v -> vm.setProcessing(p.copy(maxTempStorageMb = v)) } },
         enabled = on,
         keyboardNumeric = true,
         validate = { if ((it.toIntOrNull() ?: 0) < 1) "Enter a value of 1 or more" else null },
     )
-    PreferenceNote("Conversion can increase processing time, heat, battery use, and temporary storage.")
+    PreferenceNote(stringResource(R.string.conversion_can_increase_processing_time_heat_battery_use_and_temporary))
 
-    PreferenceGroupTitle("Diagnostics")
-    SingleChoicePreference("Diagnostic logging", DiagnosticLogLevel.entries.toList(), p.logLevel) {
+    PreferenceGroupTitle(stringResource(R.string.diagnostics))
+    SingleChoicePreference(stringResource(R.string.diagnostic_logging), DiagnosticLogLevel.entries.toList(), p.logLevel) {
         vm.setProcessing(p.copy(logLevel = it))
     }
     val exporter = rememberLauncherForActivityResult(
@@ -267,10 +269,10 @@ fun AdvancedSectionContent(settings: AppSettings, vm: SettingsViewModel) {
             withContext(Dispatchers.IO) {
                 runCatching { context.contentResolver.openOutputStream(uri)?.use { it.write(vm.buildDiagnostics().toByteArray()) } }
             }
-            Toast.makeText(context, "Diagnostics exported", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.diagnostics_exported), Toast.LENGTH_SHORT).show()
         }
     }
-    ClickablePreference("Export diagnostic log", onClick = { exporter.launch("kdownloader-diagnostics.txt") })
+    ClickablePreference(stringResource(R.string.export_diagnostic_log), onClick = { exporter.launch("kdownloader-diagnostics.txt") })
     ConfirmingAction("Clear diagnostic log", "Delete the stored diagnostic log.", "Clear") {
         vm.clearDiagnosticLog()
     }
@@ -287,30 +289,30 @@ fun PermissionsSectionContent(status: SystemStatus.Snapshot, vm: SettingsViewMod
     val folderOk = folderUri.isNotBlank() && vm.folders.hasAccess(folderUri)
 
     StatusRow(
-        title = "Notifications",
+        title = stringResource(R.string.notifications),
         ok = status.notificationsEnabled,
         onAction = { launchIntent(context, vm.system.notificationSettingsIntent()) },
     )
     StatusRow(
-        title = "Download-folder access",
+        title = stringResource(R.string.download_folder_access),
         ok = folderOk,
         okText = if (folderUri.isBlank()) "Not set" else "Granted",
         actionText = "Manage",
         onAction = { launchIntent(context, vm.system.appDetailsSettingsIntent()) },
     )
     StatusRow(
-        title = "Battery optimization exemption",
+        title = stringResource(R.string.battery_optimization_exemption),
         ok = status.ignoringBatteryOptimizations,
         onAction = { launchIntent(context, vm.system.batteryOptimizationSettingsIntent()) },
     )
     StatusRow(
-        title = "Background activity",
+        title = stringResource(R.string.background_activity),
         ok = !status.backgroundRestricted,
         okText = if (status.backgroundRestricted) "Restricted" else "Allowed",
         onAction = { launchIntent(context, vm.system.appDetailsSettingsIntent()) },
     )
     StatusRow(
-        title = "Media access (when needed)",
+        title = stringResource(R.string.media_access_when_needed),
         ok = status.hasMediaAccess,
         onAction = { launchIntent(context, vm.system.appDetailsSettingsIntent()) },
     )
@@ -321,8 +323,8 @@ fun PermissionsSectionContent(status: SystemStatus.Snapshot, vm: SettingsViewMod
             "Background downloads may be interrupted. Exempt the app from battery optimization for reliable long downloads."
         },
     )
-    PreferenceNote("Long downloads run in a foreground service with an ongoing notification, as required by Android.")
-    ClickablePreference("Re-check status", onClick = { vm.refreshStatus() })
+    PreferenceNote(stringResource(R.string.long_downloads_run_in_a_foreground_service_with_an_ongoing_notificatio))
+    ClickablePreference(stringResource(R.string.re_check_status), onClick = { vm.refreshStatus() })
 }
 
 // ---------------------------------------------------------------------------
@@ -333,26 +335,26 @@ fun PermissionsSectionContent(status: SystemStatus.Snapshot, vm: SettingsViewMod
 fun AboutSectionContent() {
     val context = LocalContext.current
 
-    PreferenceGroupTitle("About")
-    ClickablePreference("App", subtitle = "KDownloader ${BuildConfig.VERSION_NAME}", onClick = {})
-    ClickablePreference("Build number", subtitle = BuildConfig.VERSION_CODE.toString(), onClick = {})
-    ClickablePreference("Download engine", subtitle = "yt-dlp ${BuildConfig.BUNDLED_YTDLP_VERSION}", onClick = {})
-    PreferenceNote("Updates are delivered through your app store; there is no in-app updater.")
+    PreferenceGroupTitle(stringResource(R.string.about))
+    ClickablePreference(stringResource(R.string.app), subtitle = "KDownloader ${BuildConfig.VERSION_NAME}", onClick = {})
+    ClickablePreference(stringResource(R.string.build_number), subtitle = BuildConfig.VERSION_CODE.toString(), onClick = {})
+    ClickablePreference(stringResource(R.string.download_engine), subtitle = "yt-dlp ${BuildConfig.BUNDLED_YTDLP_VERSION}", onClick = {})
+    PreferenceNote(stringResource(R.string.updates_are_delivered_through_your_app_store_there_is_no_in_app_update))
 
-    PreferenceGroupTitle("Legal")
-    ClickablePreference("Open-source licenses", onClick = { openUrl(context, "https://github.com/yt-dlp/yt-dlp") })
-    ClickablePreference("Privacy policy", onClick = { openUrl(context, "https://example.com/privacy") })
-    ClickablePreference("Terms of service", onClick = { openUrl(context, "https://example.com/terms") })
+    PreferenceGroupTitle(stringResource(R.string.legal))
+    ClickablePreference(stringResource(R.string.open_source_licenses), onClick = { openUrl(context, "https://github.com/yt-dlp/yt-dlp") })
+    ClickablePreference(stringResource(R.string.privacy_policy), onClick = { openUrl(context, "https://example.com/privacy") })
+    ClickablePreference(stringResource(R.string.terms_of_service), onClick = { openUrl(context, "https://example.com/terms") })
 
-    PreferenceGroupTitle("Support")
-    ClickablePreference("Help / FAQ", onClick = { openUrl(context, "https://example.com/help") })
-    ClickablePreference("Report a problem", onClick = {
+    PreferenceGroupTitle(stringResource(R.string.support))
+    ClickablePreference(stringResource(R.string.help_faq), onClick = { openUrl(context, "https://example.com/help") })
+    ClickablePreference(stringResource(R.string.report_a_problem), onClick = {
         val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:support@example.com"))
             .putExtra(Intent.EXTRA_SUBJECT, "KDownloader ${BuildConfig.VERSION_NAME} problem report")
         launchIntent(context, intent)
     })
-    ClickablePreference("Source code", onClick = { openUrl(context, "https://github.com/") })
-    PreferenceNote("Diagnostic exports exclude credentials, private URLs, folder contents, and personal information.")
+    ClickablePreference(stringResource(R.string.source_code), onClick = { openUrl(context, "https://github.com/") })
+    PreferenceNote(stringResource(R.string.diagnostic_exports_exclude_credentials_private_urls_folder_contents_an))
 }
 
 private fun openUrl(context: Context, url: String) =
@@ -376,7 +378,7 @@ fun ResetSectionContent(vm: SettingsViewModel) {
     ConfirmingAction("Reset all settings", "Restores every setting to its default. Downloaded files and history are NOT deleted.", "Reset all") {
         vm.resetAll()
     }
-    PreferenceNote("Resetting settings never deletes downloaded files or history.")
+    PreferenceNote(stringResource(R.string.resetting_settings_never_deletes_downloaded_files_or_history))
 }
 
 // ---------------------------------------------------------------------------

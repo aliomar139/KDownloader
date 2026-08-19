@@ -1,5 +1,7 @@
 package com.kira.kdownloader.ui
 
+import androidx.compose.ui.res.stringResource
+import com.kira.kdownloader.R
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -281,7 +283,7 @@ fun HomeScreen(
                                 thumbnailUrl = currentState.info.thumbnailUrl,
                                 processId = processId,
                             )
-                            scope.launch { snackbarHostState.showSnackbar("Download started") }
+                            scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.download_started)) }
                         },
                         onCancel = { processId -> DownloadService.cancel(context, processId) },
                     )
@@ -328,7 +330,7 @@ private fun ActiveDownloadsButton(count: Int, onClick: () -> Unit) {
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.weight(1f),
             )
-            Text("View", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.view), style = MaterialTheme.typography.labelLarge)
         }
     }
 }
@@ -348,7 +350,7 @@ private fun ActiveDownloadsSheet(
                 .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Downloads", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.downloads), style = MaterialTheme.typography.titleMedium)
             if (downloads.isEmpty()) {
                 Text(
                     "No active downloads.",
@@ -465,11 +467,11 @@ private fun ClipboardSuggestionBanner(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            TextButton(onClick = onPaste) { Text("Use") }
+            TextButton(onClick = onPaste) { Text(stringResource(R.string.use)) }
             IconButton(onClick = onDismiss) {
                 Icon(
                     Icons.Outlined.Close,
-                    contentDescription = "Dismiss",
+                    contentDescription = stringResource(R.string.dismiss),
                     tint = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
             }
@@ -532,14 +534,14 @@ private fun DownloadFinishedDialog(
                         openMedia(context, state.fileUri, state.kind)
                         onDismiss()
                     },
-                ) { Text("Open") }
+                ) { Text(stringResource(R.string.open)) }
             } else {
-                TextButton(onClick = onDismiss) { Text("OK") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.ok)) }
             }
         },
         dismissButton = {
             if (succeeded && state.fileUri != null) {
-                TextButton(onClick = onDismiss) { Text("Done") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.done)) }
             }
         },
     )
@@ -556,7 +558,7 @@ private fun openMedia(context: Context, fileUri: String, kind: String) {
         context.startActivity(Intent.createChooser(viewIntent, "Open with"))
     } catch (error: Throwable) {
         Log.w("HomeScreen", "Could not open media", error)
-        Toast.makeText(context, "Couldn't open this file", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.couldn_t_open_this_file), Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -578,7 +580,7 @@ private fun BrandHeader(darkTheme: Boolean, onToggleTheme: () -> Unit) {
         }
         Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
-            Text("KDownloader", style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(R.string.kdownloader), style = MaterialTheme.typography.headlineSmall)
             Text(
                 "Save video & audio from any link",
                 style = MaterialTheme.typography.bodyMedium,
@@ -625,7 +627,7 @@ private fun UrlInputCard(
                 value = url,
                 onValueChange = onUrlChange,
                 placeholder = { Text("https://…") },
-                label = { Text("Video or audio URL") },
+                label = { Text(stringResource(R.string.video_or_audio_url)) },
                 singleLine = true,
                 shape = MaterialTheme.shapes.medium,
                 colors = OutlinedTextFieldDefaults.colors(
@@ -649,7 +651,7 @@ private fun UrlInputCard(
                         IconButton(onClick = onPaste) {
                             Icon(
                                 Icons.Outlined.ContentPaste,
-                                contentDescription = "Paste from clipboard",
+                                contentDescription = stringResource(R.string.paste_from_clipboard),
                                 tint = MaterialTheme.colorScheme.primary,
                             )
                         }
@@ -657,7 +659,7 @@ private fun UrlInputCard(
                         IconButton(onClick = onClear) {
                             Icon(
                                 Icons.Outlined.Close,
-                                contentDescription = "Clear URL",
+                                contentDescription = stringResource(R.string.clear_url),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -688,7 +690,7 @@ private fun UrlInputCard(
                 } else {
                     Icon(Icons.Default.Download, contentDescription = null, Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text("Get formats")
+                    Text(stringResource(R.string.get_formats))
                 }
             }
         }
@@ -723,7 +725,7 @@ private fun IdleState(
                     )
                 }
                 Spacer(Modifier.height(16.dp))
-                Text("Ready when you are", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.ready_when_you_are), style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(6.dp))
                 Text(
                     "Paste a link above, or share one to\nKDownloader from any app.",
@@ -873,7 +875,7 @@ private fun ErrorState(message: String, onRetry: () -> Unit) {
                 onClick = onRetry,
                 modifier = Modifier.align(Alignment.End),
             ) {
-                Text("Try again", color = MaterialTheme.colorScheme.onErrorContainer)
+                Text(stringResource(R.string.try_again), color = MaterialTheme.colorScheme.onErrorContainer)
             }
         }
     }
