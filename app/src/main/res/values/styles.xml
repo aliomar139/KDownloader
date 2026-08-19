@@ -20,70 +20,70 @@
         <item name="android:fontFamily">sans</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">28sp</item>
-        <item name="android:lineHeight">34sp</item>
+        <item name="lineHeight">34sp</item>
         <item name="android:letterSpacing">-0.0089</item>
     </style>
     <style name="TextAppearance.KDownloader.HeadlineSmall" parent="TextAppearance.Material3.HeadlineSmall">
         <item name="android:fontFamily">sans</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">24sp</item>
-        <item name="android:lineHeight">30sp</item>
+        <item name="lineHeight">30sp</item>
         <item name="android:letterSpacing">-0.0104</item>
     </style>
     <style name="TextAppearance.KDownloader.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
         <item name="android:fontFamily">sans</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">20sp</item>
-        <item name="android:lineHeight">26sp</item>
+        <item name="lineHeight">26sp</item>
     </style>
     <style name="TextAppearance.KDownloader.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:fontFamily">sans</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">16sp</item>
-        <item name="android:lineHeight">22sp</item>
+        <item name="lineHeight">22sp</item>
         <item name="android:letterSpacing">0.0063</item>
     </style>
     <style name="TextAppearance.KDownloader.TitleSmall" parent="TextAppearance.Material3.TitleSmall">
         <item name="android:fontFamily">sans</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:lineHeight">20sp</item>
+        <item name="lineHeight">20sp</item>
         <item name="android:letterSpacing">0.0071</item>
     </style>
     <style name="TextAppearance.KDownloader.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
         <item name="android:fontFamily">sans</item>
         <item name="android:textSize">16sp</item>
-        <item name="android:lineHeight">24sp</item>
+        <item name="lineHeight">24sp</item>
         <item name="android:letterSpacing">0.0094</item>
     </style>
     <style name="TextAppearance.KDownloader.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
         <item name="android:fontFamily">sans</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:lineHeight">21sp</item>
+        <item name="lineHeight">21sp</item>
         <item name="android:letterSpacing">0.0107</item>
     </style>
     <style name="TextAppearance.KDownloader.BodySmall" parent="TextAppearance.Material3.BodySmall">
         <item name="android:fontFamily">sans</item>
         <item name="android:textSize">12sp</item>
-        <item name="android:lineHeight">17sp</item>
+        <item name="lineHeight">17sp</item>
         <item name="android:letterSpacing">0.0167</item>
     </style>
     <style name="TextAppearance.KDownloader.LabelLarge" parent="TextAppearance.Material3.LabelLarge">
         <item name="android:fontFamily">sans</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:lineHeight">20sp</item>
+        <item name="lineHeight">20sp</item>
         <item name="android:letterSpacing">0.0071</item>
     </style>
     <style name="TextAppearance.KDownloader.LabelMedium" parent="TextAppearance.Material3.LabelMedium">
         <item name="android:fontFamily">sans</item>
         <item name="android:textSize">12sp</item>
-        <item name="android:lineHeight">16sp</item>
+        <item name="lineHeight">16sp</item>
         <item name="android:letterSpacing">0.0333</item>
     </style>
     <style name="TextAppearance.KDownloader.LabelSmall" parent="TextAppearance.Material3.LabelSmall">
         <item name="android:fontFamily">sans</item>
         <item name="android:textSize">11sp</item>
-        <item name="android:lineHeight">15sp</item>
+        <item name="lineHeight">15sp</item>
         <item name="android:letterSpacing">0.0364</item>
     </style>
 </resources>

@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import androidx.annotation.WorkerThread;
+import androidx.annotation.RequiresApi;
 
 import com.kira.kdownloader.data.DownloadDao;
 import com.kira.kdownloader.data.DownloadEntity;
@@ -80,6 +81,7 @@ public final class DownloadDirectoryScanner {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? scanScopedStorage(context) : scanLegacyStorage(context);
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     private static List<ScannedMedia> scanScopedStorage(Context context) {
         Set<Long> seenIds = new HashSet<>();
         List<ScannedMedia> result = new ArrayList<>();

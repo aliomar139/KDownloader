@@ -112,3 +112,12 @@ None yet.
 - Deleted the Settings Compose files, shared Compose bridge, and the now-unused Kotlin theme sources. No `.kt` or `.kts` source files remain in the working tree.
 - Gates: `assembleDebug` and `testDebugUnitTest` passed; 65 JVM tests, zero failures. `verifyBundledYtDlp` also passed through `preBuild`.
 - Behavioral checklist items 20–30, preference restart round-trips, and API-level language/folder/permission checks require a real device or emulator and were skipped because none is connected.
+
+## Phase 10 — Kotlin removal
+
+- Removed the Kotlin Android and Compose plugins, all direct Compose/KTX/coroutines/Coil dependencies, `room-ktx`, `kotlin.code.style`, the `.kotlin/` cache, and its ignore rule.
+- Purity checks pass: no tracked `.kt`/`.kts`, no Kotlin/Compose/KSP build references, and no Groovy source files. The sole Java Kotlin reference is the permitted `kotlin.Unit` callback return at the youtubedl-android boundary.
+- Replaced framework-only `android:lineHeight` attributes with the Material compatibility attribute and annotated the API-29 scoped-storage scanner path, clearing all 12 lint errors without changing behavior.
+- Gates: clean `assembleDebug`, `assembleRelease`, `lintDebug`, `testDebugUnitTest` (65 passed), and `verifyBundledYtDlp` passed. The first release attempt encountered a transient Windows lock on generated `classes.dex`; stopping Gradle, removing only the generated release dex directory, and retrying with one worker succeeded.
+- Java-only debug APK: 160,361,304 bytes. Unsigned release APK: 157,127,344 bytes.
+- Connected instrumentation and manual/device gates remain skipped because no device or emulator is connected.
