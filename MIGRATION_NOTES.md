@@ -91,6 +91,15 @@ None yet.
 - Gates: `assembleDebug` and `testDebugUnitTest` passed; 65 JVM tests, zero failures. `verifyBundledYtDlp` also passed through `preBuild`.
 - Behavioral checklist items 1â€“12 require a real device/emulator and were skipped because none is connected.
 
+## Phase 8 â€” Native History
+
+- Replaced `HistoryScreen.kt` and the History `ComposeView` bridge with a native `HistoryFragment`, grouped `RecyclerView`, and `HistoryAdapter`.
+- Preserved newest-first Room observation, Today/Yesterday/Earlier this week/Earlier date buckets, ALL/VIDEO/AUDIO filters, title/URL search, reverse sorting, and empty/no-match states.
+- Preserved media permission requests, throttled directory rescans on entry/resume, remote Glide thumbnails, cached local media thumbnails, audio/video fallbacks, and RUNNING/COMPLETED/FAILED status labels.
+- Preserved row open/long-press actions, detail bottom sheet, open/share/re-download/delete actions, two-way swipe-to-delete confirmation, optional MediaStore file deletion, and history-only Clear all behavior.
+- Gates: `assembleDebug` and `testDebugUnitTest` passed; 65 JVM tests, zero failures. `verifyBundledYtDlp` also passed through `preBuild`.
+- Behavioral checklist items 13â€“19 require a real device/emulator and were skipped because none is connected.
+
 ## Pre-existing issues not fixed here
 
 - No device was available to identify runtime-only baseline issues.
