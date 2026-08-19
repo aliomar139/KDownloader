@@ -56,15 +56,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     // ---- Grouped updates (each persists immediately) -------------------------
 
-    fun setDownload(value: DownloadSettings) = repository.update { it.copy(download = value) }
-    fun setStorage(value: StorageSettings) = repository.update { it.copy(storage = value) }
-    fun setBehavior(value: BehaviorSettings) = repository.update { it.copy(behavior = value) }
-    fun setNetwork(value: NetworkSettings) = repository.update { it.copy(network = value) }
-    fun setSubtitles(value: SubtitleSettings) = repository.update { it.copy(subtitles = value) }
-    fun setNotifications(value: NotificationSettings) = repository.update { it.copy(notifications = value) }
-    fun setAppearance(value: AppearanceSettings) = repository.update { it.copy(appearance = value) }
-    fun setHistory(value: HistorySettings) = repository.update { it.copy(history = value) }
-    fun setProcessing(value: ProcessingSettings) = repository.update { it.copy(processing = value) }
+    fun setDownload(value: DownloadSettings) = repository.update { it.withDownload(value) }
+    fun setStorage(value: StorageSettings) = repository.update { it.withStorage(value) }
+    fun setBehavior(value: BehaviorSettings) = repository.update { it.withBehavior(value) }
+    fun setNetwork(value: NetworkSettings) = repository.update { it.withNetwork(value) }
+    fun setSubtitles(value: SubtitleSettings) = repository.update { it.withSubtitles(value) }
+    fun setNotifications(value: NotificationSettings) = repository.update { it.withNotifications(value) }
+    fun setAppearance(value: AppearanceSettings) = repository.update { it.withAppearance(value) }
+    fun setHistory(value: HistorySettings) = repository.update { it.withHistory(value) }
+    fun setProcessing(value: ProcessingSettings) = repository.update { it.withProcessing(value) }
 
     // ---- Proxy credentials ---------------------------------------------------
 
@@ -78,10 +78,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val storage = settings.value.storage
         setStorage(
             when (slot) {
-                FolderSlot.DOWNLOAD -> storage.copy(downloadFolderUri = value)
-                FolderSlot.VIDEO -> storage.copy(videoFolderUri = value)
-                FolderSlot.AUDIO -> storage.copy(audioFolderUri = value)
-                FolderSlot.TEMP -> storage.copy(tempFolderUri = value)
+                FolderSlot.DOWNLOAD -> storage.withDownloadFolderUri(value)
+                FolderSlot.VIDEO -> storage.withVideoFolderUri(value)
+                FolderSlot.AUDIO -> storage.withAudioFolderUri(value)
+                FolderSlot.TEMP -> storage.withTempFolderUri(value)
             },
         )
     }
@@ -97,10 +97,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         folders.release(current)
         setStorage(
             when (slot) {
-                FolderSlot.DOWNLOAD -> storage.copy(downloadFolderUri = "")
-                FolderSlot.VIDEO -> storage.copy(videoFolderUri = "")
-                FolderSlot.AUDIO -> storage.copy(audioFolderUri = "")
-                FolderSlot.TEMP -> storage.copy(tempFolderUri = "")
+                FolderSlot.DOWNLOAD -> storage.withDownloadFolderUri("")
+                FolderSlot.VIDEO -> storage.withVideoFolderUri("")
+                FolderSlot.AUDIO -> storage.withAudioFolderUri("")
+                FolderSlot.TEMP -> storage.withTempFolderUri("")
             },
         )
     }

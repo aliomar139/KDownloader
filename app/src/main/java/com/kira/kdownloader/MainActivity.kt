@@ -113,7 +113,7 @@ class MainActivity : ComponentActivity() {
 
             fun toggleTheme() {
                 settingsViewModel.setAppearance(
-                    appearance.copy(theme = if (darkTheme) AppTheme.LIGHT else AppTheme.DARK),
+                    appearance.withTheme(if (darkTheme) AppTheme.LIGHT else AppTheme.DARK),
                 )
             }
 

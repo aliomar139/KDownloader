@@ -90,8 +90,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Observer
 import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.kira.kdownloader.data.AppDatabase
 import com.kira.kdownloader.data.DownloadEntity
@@ -116,8 +116,12 @@ fun HistoryScreen(
 ) {
     val context = LocalContext.current
     val dao = remember(context) { AppDatabase.get(context).downloadDao() }
-    val historyFlow = remember(dao) { dao.observeAll() }
-    val history by historyFlow.collectAsStateWithLifecycle(initialValue = emptyList())
+    val history by produceState<List<DownloadEntity>>(emptyList(), dao) {
+        val liveHistory = dao.observeAll()
+        val observer = Observer<List<DownloadEntity>> { value = it }
+        liveHistory.observeForever(observer)
+        awaitDispose { liveHistory.removeObserver(observer) }
+    }
     val dateFormat = remember { DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT) }
     val scope = rememberCoroutineScope()
     var pendingDelete by remember { mutableStateOf<DownloadEntity?>(null) }
@@ -197,7 +201,7 @@ fun HistoryScreen(
                 TextButton(
                     onClick = {
                         showClearAll = false
-                        scope.launch { dao.clearAll() }
+                        scope.launch { withContext(Dispatchers.IO) { dao.clearAll() } }
                     },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.error,
@@ -251,7 +255,7 @@ fun HistoryScreen(
                             }
                         }
                     }
-                    dao.deleteById(download.id)
+                    withContext(Dispatchers.IO) { dao.deleteById(download.id) }
                     pendingDelete = null
                 }
             },

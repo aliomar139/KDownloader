@@ -73,26 +73,26 @@ fun NotificationsSectionContent(settings: AppSettings, vm: SettingsViewModel) {
 
     PreferenceGroupTitle(stringResource(R.string.alerts))
     SwitchPreference(stringResource(R.string.show_download_progress_notifications), nt.showProgress) {
-        vm.setNotifications(nt.copy(showProgress = it))
+        vm.setNotifications(nt.withShowProgress(it))
     }
     SwitchPreference(stringResource(R.string.notify_when_a_download_completes), nt.notifyOnEachComplete) {
-        vm.setNotifications(nt.copy(notifyOnEachComplete = it))
+        vm.setNotifications(nt.withNotifyOnEachComplete(it))
     }
     SwitchPreference(stringResource(R.string.notify_when_all_downloads_complete), nt.notifyOnAllComplete) {
-        vm.setNotifications(nt.copy(notifyOnAllComplete = it))
+        vm.setNotifications(nt.withNotifyOnAllComplete(it))
     }
     SwitchPreference(stringResource(R.string.notify_when_a_download_fails), nt.notifyOnFailure) {
-        vm.setNotifications(nt.copy(notifyOnFailure = it))
+        vm.setNotifications(nt.withNotifyOnFailure(it))
     }
 
     PreferenceGroupTitle(stringResource(R.string.style))
-    SwitchPreference(stringResource(R.string.notification_sound), nt.sound) { vm.setNotifications(nt.copy(sound = it)) }
-    SwitchPreference(stringResource(R.string.vibration), nt.vibration) { vm.setNotifications(nt.copy(vibration = it)) }
+    SwitchPreference(stringResource(R.string.notification_sound), nt.sound) { vm.setNotifications(nt.withSound(it)) }
+    SwitchPreference(stringResource(R.string.vibration), nt.vibration) { vm.setNotifications(nt.withVibration(it)) }
     SwitchPreference(stringResource(R.string.show_pause_resume_cancel_actions), nt.showActions) {
-        vm.setNotifications(nt.copy(showActions = it))
+        vm.setNotifications(nt.withShowActions(it))
     }
     SwitchPreference(stringResource(R.string.group_multiple_notifications), nt.groupNotifications) {
-        vm.setNotifications(nt.copy(groupNotifications = it))
+        vm.setNotifications(nt.withGroupNotifications(it))
     }
     ClickablePreference(stringResource(R.string.open_android_notification_settings), onClick = {
         launchIntent(context, vm.system.notificationSettingsIntent())
@@ -109,16 +109,16 @@ fun AppearanceSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     val dynamicSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
     PreferenceGroupTitle(stringResource(R.string.theme))
-    SingleChoicePreference(stringResource(R.string.app_theme), AppTheme.entries.toList(), a.theme) {
-        vm.setAppearance(a.copy(theme = it))
+    SingleChoicePreference(stringResource(R.string.app_theme), AppTheme.values().toList(), a.theme) {
+        vm.setAppearance(a.withTheme(it))
     }
     SwitchPreference(stringResource(R.string.dynamic_color), a.dynamicColor,
         subtitle = if (dynamicSupported) "Use colors from your wallpaper" else "Requires Android 12 or newer",
         enabled = dynamicSupported) {
-        vm.setAppearance(a.copy(dynamicColor = it))
+        vm.setAppearance(a.withDynamicColor(it))
     }
     SwitchPreference(stringResource(R.string.high_contrast_mode), a.highContrast) {
-        vm.setAppearance(a.copy(highContrast = it))
+        vm.setAppearance(a.withHighContrast(it))
     }
 
     PreferenceGroupTitle(stringResource(R.string.language))
@@ -126,26 +126,26 @@ fun AppearanceSectionContent(settings: AppSettings, vm: SettingsViewModel) {
         title = stringResource(R.string.app_language),
         options = LanguageManager.SUPPORTED.map { it.tag to it.display },
         selectedValue = a.languageTag,
-    ) { vm.setAppearance(a.copy(languageTag = it)) }
+    ) { vm.setAppearance(a.withLanguageTag(it)) }
     PreferenceNote(stringResource(R.string.language_and_theme_changes_are_applied_right_away_and_keep_your_place))
 
     PreferenceGroupTitle(stringResource(R.string.download_list))
     SwitchPreference(stringResource(R.string.compact_download_list_mode), a.compactList) {
-        vm.setAppearance(a.copy(compactList = it))
+        vm.setAppearance(a.withCompactList(it))
     }
     SwitchPreference(stringResource(R.string.show_file_size_estimates), a.showFileSize) {
-        vm.setAppearance(a.copy(showFileSize = it))
+        vm.setAppearance(a.withShowFileSize(it))
     }
     SwitchPreference(stringResource(R.string.show_download_speed), a.showSpeed) {
-        vm.setAppearance(a.copy(showSpeed = it))
+        vm.setAppearance(a.withShowSpeed(it))
     }
     SwitchPreference(stringResource(R.string.show_estimated_time_remaining), a.showEta) {
-        vm.setAppearance(a.copy(showEta = it))
+        vm.setAppearance(a.withShowEta(it))
     }
 
     PreferenceGroupTitle(stringResource(R.string.motion))
     SwitchPreference(stringResource(R.string.reduce_animations), a.reduceAnimations) {
-        vm.setAppearance(a.copy(reduceAnimations = it))
+        vm.setAppearance(a.withReduceAnimations(it))
     }
     PreferenceNote(stringResource(R.string.text_size_follows_your_android_system_accessibility_settings))
 }
@@ -162,15 +162,15 @@ fun HistoryPrivacySectionContent(settings: AppSettings, vm: SettingsViewModel) {
 
     PreferenceGroupTitle(stringResource(R.string.history))
     SwitchPreference(stringResource(R.string.keep_download_history), h.keepHistory) {
-        vm.setHistory(h.copy(keepHistory = it))
+        vm.setHistory(h.withKeepHistory(it))
     }
-    SingleChoicePreference(stringResource(R.string.history_retention), HistoryRetention.entries.toList(), h.retention,
-        enabled = h.keepHistory) { vm.setHistory(h.copy(retention = it)) }
+    SingleChoicePreference(stringResource(R.string.history_retention), HistoryRetention.values().toList(), h.retention,
+        enabled = h.keepHistory) { vm.setHistory(h.withRetention(it)) }
     SwitchPreference(stringResource(R.string.save_recently_used_urls), h.saveRecentUrls) {
-        vm.setHistory(h.copy(saveRecentUrls = it))
+        vm.setHistory(h.withSaveRecentUrls(it))
     }
     SwitchPreference(stringResource(R.string.save_search_history), h.saveSearchHistory) {
-        vm.setHistory(h.copy(saveSearchHistory = it))
+        vm.setHistory(h.withSaveSearchHistory(it))
     }
     PreferenceNote(stringResource(R.string.clearing_history_never_deletes_your_downloaded_media))
 
@@ -236,22 +236,22 @@ fun AdvancedSectionContent(settings: AppSettings, vm: SettingsViewModel) {
 
     PreferenceGroupTitle(stringResource(R.string.conversion))
     SwitchPreference(stringResource(R.string.enable_post_download_conversion), p.enableConversion) {
-        vm.setProcessing(p.copy(enableConversion = it))
+        vm.setProcessing(p.withEnableConversion(it))
     }
     SwitchPreference(stringResource(R.string.delete_source_files_after_successful_conversion), p.deleteSourceAfterConversion,
-        enabled = on) { vm.setProcessing(p.copy(deleteSourceAfterConversion = it)) }
+        enabled = on) { vm.setProcessing(p.withDeleteSourceAfterConversion(it)) }
     SwitchPreference(stringResource(R.string.preserve_source_files_when_conversion_fails), p.preserveSourceOnFailure,
-        enabled = on) { vm.setProcessing(p.copy(preserveSourceOnFailure = it)) }
+        enabled = on) { vm.setProcessing(p.withPreserveSourceOnFailure(it)) }
     SwitchPreference(stringResource(R.string.prefer_hardware_acceleration_when_supported), p.preferHardwareAcceleration,
-        enabled = on) { vm.setProcessing(p.copy(preferHardwareAcceleration = it)) }
-    SingleChoicePreference(stringResource(R.string.processing_priority), ProcessingPriority.entries.toList(), p.priority,
-        enabled = on) { vm.setProcessing(p.copy(priority = it)) }
+        enabled = on) { vm.setProcessing(p.withPreferHardwareAcceleration(it)) }
+    SingleChoicePreference(stringResource(R.string.processing_priority), ProcessingPriority.values().toList(), p.priority,
+        enabled = on) { vm.setProcessing(p.withPriority(it)) }
     SwitchPreference(stringResource(R.string.allow_processing_in_the_background), p.allowBackgroundProcessing,
-        enabled = on) { vm.setProcessing(p.copy(allowBackgroundProcessing = it)) }
+        enabled = on) { vm.setProcessing(p.withAllowBackgroundProcessing(it)) }
     TextEntryPreference(
         title = stringResource(R.string.maximum_temporary_storage_mb),
         value = p.maxTempStorageMb.toString(),
-        onValueChange = { it.toIntOrNull()?.let { v -> vm.setProcessing(p.copy(maxTempStorageMb = v)) } },
+        onValueChange = { it.toIntOrNull()?.let { v -> vm.setProcessing(p.withMaxTempStorageMb(v)) } },
         enabled = on,
         keyboardNumeric = true,
         validate = { if ((it.toIntOrNull() ?: 0) < 1) "Enter a value of 1 or more" else null },
@@ -259,8 +259,8 @@ fun AdvancedSectionContent(settings: AppSettings, vm: SettingsViewModel) {
     PreferenceNote(stringResource(R.string.conversion_can_increase_processing_time_heat_battery_use_and_temporary))
 
     PreferenceGroupTitle(stringResource(R.string.diagnostics))
-    SingleChoicePreference(stringResource(R.string.diagnostic_logging), DiagnosticLogLevel.entries.toList(), p.logLevel) {
-        vm.setProcessing(p.copy(logLevel = it))
+    SingleChoicePreference(stringResource(R.string.diagnostic_logging), DiagnosticLogLevel.values().toList(), p.logLevel) {
+        vm.setProcessing(p.withLogLevel(it))
     }
     val exporter = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("text/plain"),

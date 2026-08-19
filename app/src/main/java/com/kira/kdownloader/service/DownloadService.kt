@@ -111,14 +111,15 @@ class DownloadService : Service() {
             try {
                 val insertedId = dao.insert(
                     DownloadEntity(
-                        title = title,
-                        sourceUrl = url,
-                        kind = choice.kind.name,
-                        formatLabel = choice.label,
-                        fileUri = null,
-                        thumbnailUrl = thumbnailUrl,
-                        createdAt = System.currentTimeMillis(),
-                        status = DownloadStatus.RUNNING,
+                        0L,
+                        title,
+                        url,
+                        choice.kind.name,
+                        choice.label,
+                        null,
+                        thumbnailUrl,
+                        System.currentTimeMillis(),
+                        DownloadStatus.RUNNING,
                     ),
                 )
                 rowId = insertedId

@@ -44,6 +44,17 @@ None yet.
 - Gates: `assembleDebug` and `testDebugUnitTest` passed; 65 tests, zero failures.
 - Connected-device and manual gates: skipped because no device or emulator is connected.
 
+## Phase 4 — Settings models and Room data
+
+- Split `SettingsModel.kt` into one Java type per file: 19 `SettingOption` enums, `SettingsCategory`, the shared option resolver, and 10 immutable settings snapshot classes.
+- Preserved every enum storage key, label, default value, preference key, clamping rule, and grouped-settings equality contract. Kotlin `copy` call sites now use explicit `withX` methods.
+- Converted `DownloadEntity`, `DownloadStatus`, `Converters`, `DownloadDao`, and `AppDatabase` to Java without changing the `downloads` table, columns, type conversion, database filename, or schema version 1.
+- Replaced Room `Flow`/suspend DAO methods with `LiveData` plus blocking worker-thread methods and `getAllSync()` for tests. The Compose history screen uses a temporary lifecycle-aware LiveData bridge and dispatches writes to `Dispatchers.IO`.
+- Replaced KSP Room processing with `annotationProcessor androidx.room:room-compiler:2.6.1` and removed the KSP plugin.
+- Ported `SettingsRepositoryTest`, `DownloadDaoTest`, and `DownloadDirectoryScannerAndroidTest` to Java. The instrumentation APK compiles successfully.
+- Gates: `assembleDebug`, `assembleDebugAndroidTest`, and `testDebugUnitTest` passed; 65 JVM tests, zero failures.
+- Connected instrumentation, installed-data compatibility, and manual gates: skipped because no device or emulator is connected. A later `adb devices -l` check timed out while starting/querying adb; no device became available.
+
 ## Kotlin-library Java interop adaptations
 
 None yet.

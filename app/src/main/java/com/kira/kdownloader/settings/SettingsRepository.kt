@@ -40,11 +40,11 @@ class SettingsRepository(
     // ---- Read ----------------------------------------------------------------
 
     fun read(): AppSettings = decode(StoreSource(store)).let { decoded ->
-        decoded.copy(
+        decoded.withNetwork(
             // Derived from a plain-store marker kept in sync by [setProxyPassword]. This keeps the
             // encrypted Keystore off the hot read path (read runs on the main thread per emission).
-            network = decoded.network.copy(
-                proxyPasswordSet = store.getBoolean(SettingsKeys.NW_PROXY_PASSWORD_SET, false),
+            decoded.network.withProxyPasswordSet(
+                store.getBoolean(SettingsKeys.NW_PROXY_PASSWORD_SET, false),
             ),
         )
     }
@@ -64,7 +64,7 @@ class SettingsRepository(
         store.edit { editor -> encodeFields(clean, DiffEditorSink(editor)) }
     }
 
-    /** Read-modify-write convenience: `update { it.copy(...) }`. */
+    /** Read-modify-write convenience using the immutable model's `withX` methods. */
     fun update(transform: (AppSettings) -> AppSettings) = save(transform(read()))
 
     // ---- Proxy password (secure) --------------------------------------------
@@ -93,18 +93,18 @@ class SettingsRepository(
         val d = AppSettings.DEFAULTS
         val current = read()
         val reset = when (category) {
-            SettingsCategory.DOWNLOAD -> current.copy(download = d.download)
-            SettingsCategory.STORAGE -> current.copy(storage = d.storage)
-            SettingsCategory.BEHAVIOR -> current.copy(behavior = d.behavior)
+            SettingsCategory.DOWNLOAD -> current.withDownload(d.download)
+            SettingsCategory.STORAGE -> current.withStorage(d.storage)
+            SettingsCategory.BEHAVIOR -> current.withBehavior(d.behavior)
             SettingsCategory.NETWORK -> {
                 setProxyPassword(null)
-                current.copy(network = d.network)
+                current.withNetwork(d.network)
             }
-            SettingsCategory.SUBTITLES -> current.copy(subtitles = d.subtitles)
-            SettingsCategory.NOTIFICATIONS -> current.copy(notifications = d.notifications)
-            SettingsCategory.APPEARANCE -> current.copy(appearance = d.appearance)
-            SettingsCategory.HISTORY -> current.copy(history = d.history)
-            SettingsCategory.PROCESSING -> current.copy(processing = d.processing)
+            SettingsCategory.SUBTITLES -> current.withSubtitles(d.subtitles)
+            SettingsCategory.NOTIFICATIONS -> current.withNotifications(d.notifications)
+            SettingsCategory.APPEARANCE -> current.withAppearance(d.appearance)
+            SettingsCategory.HISTORY -> current.withHistory(d.history)
+            SettingsCategory.PROCESSING -> current.withProcessing(d.processing)
         }
         save(reset)
     }
@@ -150,140 +150,101 @@ class SettingsRepository(
     /** Clamps every numeric/textual field into its documented valid range. */
     private fun sanitize(s: AppSettings): AppSettings {
         val templateValid = FilenameTemplate.validate(s.storage.filenameTemplate) is FilenameTemplate.Validation.Valid
-        return s.copy(
-            storage = s.storage.copy(
-                filenameTemplate = if (templateValid) s.storage.filenameTemplate else "{title}",
-                maxFilenameLength = s.storage.maxFilenameLength
-                    .coerceIn(FilenameTemplate.MIN_LENGTH, FilenameTemplate.MAX_LENGTH),
-            ),
-            behavior = s.behavior.copy(
-                maxSimultaneousDownloads = s.behavior.maxSimultaneousDownloads.coerceIn(1, 5),
-                maxRetryCount = s.behavior.maxRetryCount.coerceIn(0, 10),
-                speedLimitKbps = s.behavior.speedLimitKbps.coerceAtLeast(1),
-                scheduleStartMinutes = s.behavior.scheduleStartMinutes.coerceIn(0, 1439),
-                scheduleEndMinutes = s.behavior.scheduleEndMinutes.coerceIn(0, 1439),
-            ),
-            network = s.network.copy(
-                proxyPort = s.network.proxyPort.coerceIn(0, 65535),
-                mobileDataWarningMb = s.network.mobileDataWarningMb.coerceAtLeast(1),
-            ),
-            processing = s.processing.copy(
-                maxTempStorageMb = s.processing.maxTempStorageMb.coerceAtLeast(1),
-            ),
-        )
+        val storage = s.storage
+            .withFilenameTemplate(if (templateValid) s.storage.filenameTemplate else "{title}")
+            .withMaxFilenameLength(s.storage.maxFilenameLength.coerceIn(FilenameTemplate.MIN_LENGTH, FilenameTemplate.MAX_LENGTH))
+        val behavior = s.behavior
+            .withMaxSimultaneousDownloads(s.behavior.maxSimultaneousDownloads.coerceIn(1, 5))
+            .withMaxRetryCount(s.behavior.maxRetryCount.coerceIn(0, 10))
+            .withSpeedLimitKbps(s.behavior.speedLimitKbps.coerceAtLeast(1))
+            .withScheduleStartMinutes(s.behavior.scheduleStartMinutes.coerceIn(0, 1439))
+            .withScheduleEndMinutes(s.behavior.scheduleEndMinutes.coerceIn(0, 1439))
+        val network = s.network
+            .withProxyPort(s.network.proxyPort.coerceIn(0, 65535))
+            .withMobileDataWarningMb(s.network.mobileDataWarningMb.coerceAtLeast(1))
+        return s.withStorage(storage)
+            .withBehavior(behavior)
+            .withNetwork(network)
+            .withProcessing(s.processing.withMaxTempStorageMb(s.processing.maxTempStorageMb.coerceAtLeast(1)))
     }
 
     // ---- Field mapping (single definition, reused by read/import/export/save) -
 
     private fun decode(src: Source): AppSettings = AppSettings(
-        download = DownloadSettings(
-            downloadType = src.option(SettingsKeys.DL_TYPE, DownloadType.entries.toTypedArray(), DownloadType.VIDEO),
-            videoFormat = src.option(SettingsKeys.DL_VIDEO_FORMAT, VideoFormat.entries.toTypedArray(), VideoFormat.MP4),
-            audioFormat = src.option(SettingsKeys.DL_AUDIO_FORMAT, AudioFormat.entries.toTypedArray(), AudioFormat.MP3),
-            videoQuality = src.option(SettingsKeys.DL_VIDEO_QUALITY, VideoQuality.entries.toTypedArray(), VideoQuality.BEST),
-            audioQuality = src.option(SettingsKeys.DL_AUDIO_QUALITY, AudioQuality.entries.toTypedArray(), AudioQuality.BEST),
-            frameRate = src.option(SettingsKeys.DL_FRAME_RATE, FrameRatePreference.entries.toTypedArray(), FrameRatePreference.BEST),
-            preferHdr = src.bool(SettingsKeys.DL_PREFER_HDR, false),
-            preferAndroidCompatibleCodecs = src.bool(SettingsKeys.DL_ANDROID_CODECS, true),
-            autoFallbackQuality = src.bool(SettingsKeys.DL_AUTO_FALLBACK, true),
-            askQualityBeforeEachDownload = src.bool(SettingsKeys.DL_ASK_QUALITY, false),
-            downloadThumbnail = src.bool(SettingsKeys.DL_THUMBNAIL, true),
-            embedThumbnail = src.bool(SettingsKeys.DL_EMBED_THUMBNAIL, true),
-            embedMetadata = src.bool(SettingsKeys.DL_EMBED_METADATA, true),
-            preserveUploadDate = src.bool(SettingsKeys.DL_PRESERVE_DATE, true),
+        DownloadSettings(
+            src.option(SettingsKeys.DL_TYPE, DownloadType.values(), DownloadType.VIDEO),
+            src.option(SettingsKeys.DL_VIDEO_FORMAT, VideoFormat.values(), VideoFormat.MP4),
+            src.option(SettingsKeys.DL_AUDIO_FORMAT, AudioFormat.values(), AudioFormat.MP3),
+            src.option(SettingsKeys.DL_VIDEO_QUALITY, VideoQuality.values(), VideoQuality.BEST),
+            src.option(SettingsKeys.DL_AUDIO_QUALITY, AudioQuality.values(), AudioQuality.BEST),
+            src.option(SettingsKeys.DL_FRAME_RATE, FrameRatePreference.values(), FrameRatePreference.BEST),
+            src.bool(SettingsKeys.DL_PREFER_HDR, false), src.bool(SettingsKeys.DL_ANDROID_CODECS, true),
+            src.bool(SettingsKeys.DL_AUTO_FALLBACK, true), src.bool(SettingsKeys.DL_ASK_QUALITY, false),
+            src.bool(SettingsKeys.DL_THUMBNAIL, true), src.bool(SettingsKeys.DL_EMBED_THUMBNAIL, true),
+            src.bool(SettingsKeys.DL_EMBED_METADATA, true), src.bool(SettingsKeys.DL_PRESERVE_DATE, true),
         ),
-        storage = StorageSettings(
-            downloadFolderUri = src.str(SettingsKeys.ST_FOLDER, ""),
-            videoFolderUri = src.str(SettingsKeys.ST_VIDEO_FOLDER, ""),
-            audioFolderUri = src.str(SettingsKeys.ST_AUDIO_FOLDER, ""),
-            tempFolderUri = src.str(SettingsKeys.ST_TEMP_FOLDER, ""),
-            warnOnLowSpace = src.bool(SettingsKeys.ST_WARN_LOW_SPACE, true),
-            filenameConflict = src.option(SettingsKeys.ST_CONFLICT, FilenameConflict.entries.toTypedArray(), FilenameConflict.ADD_NUMBER),
-            filenameTemplate = src.str(SettingsKeys.ST_TEMPLATE, "{title}"),
-            maxFilenameLength = src.int(SettingsKeys.ST_MAX_NAME_LEN, 120),
-            subfolderOrganization = src.option(SettingsKeys.ST_SUBFOLDER, SubfolderOrganization.entries.toTypedArray(), SubfolderOrganization.NONE),
+        StorageSettings(
+            src.str(SettingsKeys.ST_FOLDER, ""), src.str(SettingsKeys.ST_VIDEO_FOLDER, ""),
+            src.str(SettingsKeys.ST_AUDIO_FOLDER, ""), src.str(SettingsKeys.ST_TEMP_FOLDER, ""),
+            src.bool(SettingsKeys.ST_WARN_LOW_SPACE, true),
+            src.option(SettingsKeys.ST_CONFLICT, FilenameConflict.values(), FilenameConflict.ADD_NUMBER),
+            src.str(SettingsKeys.ST_TEMPLATE, "{title}"), src.int(SettingsKeys.ST_MAX_NAME_LEN, 120),
+            src.option(SettingsKeys.ST_SUBFOLDER, SubfolderOrganization.values(), SubfolderOrganization.NONE),
         ),
-        behavior = BehaviorSettings(
-            confirmBeforeDownload = src.bool(SettingsKeys.BH_CONFIRM, false),
-            maxSimultaneousDownloads = src.int(SettingsKeys.BH_MAX_PARALLEL, 2),
-            maxRetryCount = src.int(SettingsKeys.BH_MAX_RETRY, 3),
-            autoResumeInterrupted = src.bool(SettingsKeys.BH_AUTO_RESUME, true),
-            resumeQueueAfterRestart = src.bool(SettingsKeys.BH_RESUME_QUEUE, true),
-            preventDuplicates = src.bool(SettingsKeys.BH_PREVENT_DUP, true),
-            duplicateDetection = src.option(SettingsKeys.BH_DUP_METHOD, DuplicateDetection.entries.toTypedArray(), DuplicateDetection.SOURCE_URL),
-            newDownloadPosition = src.option(SettingsKeys.BH_QUEUE_POSITION, QueuePosition.entries.toTypedArray(), QueuePosition.BOTTOM),
-            keepScreenAwake = src.bool(SettingsKeys.BH_KEEP_AWAKE, false),
-            pauseOnBatterySaver = src.bool(SettingsKeys.BH_PAUSE_BATTERY, true),
-            pauseOnOverheat = src.bool(SettingsKeys.BH_PAUSE_HOT, true),
-            autoRetryOnReconnect = src.bool(SettingsKeys.BH_RETRY_RECONNECT, true),
-            speedLimitEnabled = src.bool(SettingsKeys.BH_SPEED_LIMIT_ON, false),
-            speedLimitKbps = src.int(SettingsKeys.BH_SPEED_LIMIT_KBPS, 1024),
-            scheduleEnabled = src.bool(SettingsKeys.BH_SCHEDULE_ON, false),
-            scheduleStartMinutes = src.int(SettingsKeys.BH_SCHEDULE_START, 0),
-            scheduleEndMinutes = src.int(SettingsKeys.BH_SCHEDULE_END, 360),
-            postDownloadAction = src.option(SettingsKeys.BH_POST_ACTION, PostDownloadAction.entries.toTypedArray(), PostDownloadAction.NOTHING),
+        BehaviorSettings(
+            src.bool(SettingsKeys.BH_CONFIRM, false), src.int(SettingsKeys.BH_MAX_PARALLEL, 2),
+            src.int(SettingsKeys.BH_MAX_RETRY, 3), src.bool(SettingsKeys.BH_AUTO_RESUME, true),
+            src.bool(SettingsKeys.BH_RESUME_QUEUE, true), src.bool(SettingsKeys.BH_PREVENT_DUP, true),
+            src.option(SettingsKeys.BH_DUP_METHOD, DuplicateDetection.values(), DuplicateDetection.SOURCE_URL),
+            src.option(SettingsKeys.BH_QUEUE_POSITION, QueuePosition.values(), QueuePosition.BOTTOM),
+            src.bool(SettingsKeys.BH_KEEP_AWAKE, false), src.bool(SettingsKeys.BH_PAUSE_BATTERY, true),
+            src.bool(SettingsKeys.BH_PAUSE_HOT, true), src.bool(SettingsKeys.BH_RETRY_RECONNECT, true),
+            src.bool(SettingsKeys.BH_SPEED_LIMIT_ON, false), src.int(SettingsKeys.BH_SPEED_LIMIT_KBPS, 1024),
+            src.bool(SettingsKeys.BH_SCHEDULE_ON, false), src.int(SettingsKeys.BH_SCHEDULE_START, 0),
+            src.int(SettingsKeys.BH_SCHEDULE_END, 360),
+            src.option(SettingsKeys.BH_POST_ACTION, PostDownloadAction.values(), PostDownloadAction.NOTHING),
         ),
-        network = NetworkSettings(
-            allowedNetworks = src.option(SettingsKeys.NW_ALLOWED, NetworkType.entries.toTypedArray(), NetworkType.WIFI_AND_MOBILE),
-            allowRoaming = src.bool(SettingsKeys.NW_ROAMING, false),
-            confirmMobileData = src.bool(SettingsKeys.NW_CONFIRM_MOBILE, true),
-            mobileDataWarningMb = src.int(SettingsKeys.NW_WARN_MB, 100),
-            treatMeteredWifiAsMobile = src.bool(SettingsKeys.NW_METERED_AS_MOBILE, true),
-            pauseOnNetworkChange = src.bool(SettingsKeys.NW_PAUSE_ON_CHANGE, false),
-            retryAfterConnectionLoss = src.bool(SettingsKeys.NW_RETRY_LOSS, true),
-            proxyType = src.option(SettingsKeys.NW_PROXY_TYPE, ProxyType.entries.toTypedArray(), ProxyType.DISABLED),
-            proxyHost = src.str(SettingsKeys.NW_PROXY_HOST, ""),
-            proxyPort = src.int(SettingsKeys.NW_PROXY_PORT, 0),
-            proxyUsername = src.str(SettingsKeys.NW_PROXY_USER, ""),
-            proxyPasswordSet = false,
+        NetworkSettings(
+            src.option(SettingsKeys.NW_ALLOWED, NetworkType.values(), NetworkType.WIFI_AND_MOBILE),
+            src.bool(SettingsKeys.NW_ROAMING, false), src.bool(SettingsKeys.NW_CONFIRM_MOBILE, true),
+            src.int(SettingsKeys.NW_WARN_MB, 100), src.bool(SettingsKeys.NW_METERED_AS_MOBILE, true),
+            src.bool(SettingsKeys.NW_PAUSE_ON_CHANGE, false), src.bool(SettingsKeys.NW_RETRY_LOSS, true),
+            src.option(SettingsKeys.NW_PROXY_TYPE, ProxyType.values(), ProxyType.DISABLED),
+            src.str(SettingsKeys.NW_PROXY_HOST, ""), src.int(SettingsKeys.NW_PROXY_PORT, 0),
+            src.str(SettingsKeys.NW_PROXY_USER, ""), false,
         ),
-        subtitles = SubtitleSettings(
-            downloadSubtitles = src.bool(SettingsKeys.SB_ENABLED, false),
-            preferredLanguage = src.str(SettingsKeys.SB_LANG, "en"),
-            fallbackLanguage = src.str(SettingsKeys.SB_FALLBACK_LANG, ""),
-            subtitleType = src.option(SettingsKeys.SB_TYPE, SubtitleTypePreference.entries.toTypedArray(), SubtitleTypePreference.PREFER_MANUAL),
-            format = src.option(SettingsKeys.SB_FORMAT, SubtitleFormat.entries.toTypedArray(), SubtitleFormat.SRT),
-            embedInVideo = src.bool(SettingsKeys.SB_EMBED, true),
-            saveAsSeparateFiles = src.bool(SettingsKeys.SB_SEPARATE, false),
-            includeAllLanguages = src.bool(SettingsKeys.SB_ALL_LANGS, false),
-            addLanguageCodeToFilename = src.bool(SettingsKeys.SB_LANG_IN_NAME, true),
+        SubtitleSettings(
+            src.bool(SettingsKeys.SB_ENABLED, false), src.str(SettingsKeys.SB_LANG, "en"),
+            src.str(SettingsKeys.SB_FALLBACK_LANG, ""),
+            src.option(SettingsKeys.SB_TYPE, SubtitleTypePreference.values(), SubtitleTypePreference.PREFER_MANUAL),
+            src.option(SettingsKeys.SB_FORMAT, SubtitleFormat.values(), SubtitleFormat.SRT),
+            src.bool(SettingsKeys.SB_EMBED, true), src.bool(SettingsKeys.SB_SEPARATE, false),
+            src.bool(SettingsKeys.SB_ALL_LANGS, false), src.bool(SettingsKeys.SB_LANG_IN_NAME, true),
         ),
-        notifications = NotificationSettings(
-            showProgress = src.bool(SettingsKeys.NT_PROGRESS, true),
-            notifyOnEachComplete = src.bool(SettingsKeys.NT_EACH_COMPLETE, true),
-            notifyOnAllComplete = src.bool(SettingsKeys.NT_ALL_COMPLETE, true),
-            notifyOnFailure = src.bool(SettingsKeys.NT_FAILURE, true),
-            sound = src.bool(SettingsKeys.NT_SOUND, false),
-            vibration = src.bool(SettingsKeys.NT_VIBRATION, true),
-            showActions = src.bool(SettingsKeys.NT_ACTIONS, true),
-            groupNotifications = src.bool(SettingsKeys.NT_GROUP, true),
+        NotificationSettings(
+            src.bool(SettingsKeys.NT_PROGRESS, true), src.bool(SettingsKeys.NT_EACH_COMPLETE, true),
+            src.bool(SettingsKeys.NT_ALL_COMPLETE, true), src.bool(SettingsKeys.NT_FAILURE, true),
+            src.bool(SettingsKeys.NT_SOUND, false), src.bool(SettingsKeys.NT_VIBRATION, true),
+            src.bool(SettingsKeys.NT_ACTIONS, true), src.bool(SettingsKeys.NT_GROUP, true),
         ),
-        appearance = AppearanceSettings(
-            theme = src.option(SettingsKeys.AP_THEME, AppTheme.entries.toTypedArray(), AppTheme.SYSTEM),
-            dynamicColor = src.bool(SettingsKeys.AP_DYNAMIC_COLOR, false),
-            languageTag = src.str(SettingsKeys.AP_LANGUAGE, ""),
-            compactList = src.bool(SettingsKeys.AP_COMPACT, false),
-            showFileSize = src.bool(SettingsKeys.AP_SHOW_SIZE, true),
-            showSpeed = src.bool(SettingsKeys.AP_SHOW_SPEED, true),
-            showEta = src.bool(SettingsKeys.AP_SHOW_ETA, true),
-            reduceAnimations = src.bool(SettingsKeys.AP_REDUCE_ANIM, false),
-            highContrast = src.bool(SettingsKeys.AP_HIGH_CONTRAST, false),
+        AppearanceSettings(
+            src.option(SettingsKeys.AP_THEME, AppTheme.values(), AppTheme.SYSTEM),
+            src.bool(SettingsKeys.AP_DYNAMIC_COLOR, false), src.str(SettingsKeys.AP_LANGUAGE, ""),
+            src.bool(SettingsKeys.AP_COMPACT, false), src.bool(SettingsKeys.AP_SHOW_SIZE, true),
+            src.bool(SettingsKeys.AP_SHOW_SPEED, true), src.bool(SettingsKeys.AP_SHOW_ETA, true),
+            src.bool(SettingsKeys.AP_REDUCE_ANIM, false), src.bool(SettingsKeys.AP_HIGH_CONTRAST, false),
         ),
-        history = HistorySettings(
-            keepHistory = src.bool(SettingsKeys.HS_KEEP, true),
-            retention = src.option(SettingsKeys.HS_RETENTION, HistoryRetention.entries.toTypedArray(), HistoryRetention.FOREVER),
-            saveRecentUrls = src.bool(SettingsKeys.HS_RECENT_URLS, true),
-            saveSearchHistory = src.bool(SettingsKeys.HS_SEARCH, true),
+        HistorySettings(
+            src.bool(SettingsKeys.HS_KEEP, true),
+            src.option(SettingsKeys.HS_RETENTION, HistoryRetention.values(), HistoryRetention.FOREVER),
+            src.bool(SettingsKeys.HS_RECENT_URLS, true), src.bool(SettingsKeys.HS_SEARCH, true),
         ),
-        processing = ProcessingSettings(
-            enableConversion = src.bool(SettingsKeys.PR_ENABLE, false),
-            deleteSourceAfterConversion = src.bool(SettingsKeys.PR_DELETE_SOURCE, false),
-            preserveSourceOnFailure = src.bool(SettingsKeys.PR_PRESERVE_ON_FAIL, true),
-            preferHardwareAcceleration = src.bool(SettingsKeys.PR_HW_ACCEL, true),
-            priority = src.option(SettingsKeys.PR_PRIORITY, ProcessingPriority.entries.toTypedArray(), ProcessingPriority.BALANCED),
-            allowBackgroundProcessing = src.bool(SettingsKeys.PR_BACKGROUND, true),
-            maxTempStorageMb = src.int(SettingsKeys.PR_MAX_TEMP_MB, 2048),
-            logLevel = src.option(SettingsKeys.PR_LOG_LEVEL, DiagnosticLogLevel.entries.toTypedArray(), DiagnosticLogLevel.ERRORS),
+        ProcessingSettings(
+            src.bool(SettingsKeys.PR_ENABLE, false), src.bool(SettingsKeys.PR_DELETE_SOURCE, false),
+            src.bool(SettingsKeys.PR_PRESERVE_ON_FAIL, true), src.bool(SettingsKeys.PR_HW_ACCEL, true),
+            src.option(SettingsKeys.PR_PRIORITY, ProcessingPriority.values(), ProcessingPriority.BALANCED),
+            src.bool(SettingsKeys.PR_BACKGROUND, true), src.int(SettingsKeys.PR_MAX_TEMP_MB, 2048),
+            src.option(SettingsKeys.PR_LOG_LEVEL, DiagnosticLogLevel.values(), DiagnosticLogLevel.ERRORS),
         ),
     )
 
@@ -408,7 +369,7 @@ class SettingsRepository(
     }
 
     private fun <T> Source.option(key: String, values: Array<T>, default: T): T
-        where T : Enum<T>, T : SettingOption = optionFromKey(values, str(key, default.key), default)
+        where T : Enum<T>, T : SettingOption = SettingsOptions.optionFromKey(values, str(key, default.key), default)
 
     private class StoreSource(private val store: KeyValueStore) : Source {
         override fun str(key: String, default: String) = store.getString(key, default)

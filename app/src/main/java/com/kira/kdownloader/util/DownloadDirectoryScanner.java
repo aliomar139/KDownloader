@@ -47,7 +47,7 @@ public final class DownloadDirectoryScanner {
             long now = System.currentTimeMillis();
             if (!force && lastScanAtMs != 0 && now - lastScanAtMs < MIN_RESCAN_INTERVAL_MS) return 0;
 
-            Set<String> existingUris = new HashSet<>(dao.getAllFileUrisSync());
+            Set<String> existingUris = new HashSet<>(dao.getAllFileUris());
             Set<Long> existingIds = new HashSet<>();
             for (String uri : existingUris) {
                 Long id = mediaStoreIdFrom(uri);
@@ -66,7 +66,7 @@ public final class DownloadDirectoryScanner {
             for (ScannedMedia media : discovered) {
                 String uri = media.entity.getFileUri();
                 if (existingIds.contains(media.mediaStoreId) || existingUris.contains(uri)) continue;
-                dao.insertSync(media.entity);
+                dao.insert(media.entity);
                 existingIds.add(media.mediaStoreId);
                 if (uri != null) existingUris.add(uri);
                 inserted++;
