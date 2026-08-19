@@ -71,6 +71,16 @@ None yet.
 - Gates: `assembleDebug` and `testDebugUnitTest` passed; 65 JVM tests, zero failures. `verifyBundledYtDlp` also passed through `preBuild`.
 - Connected-device, cancellation-under-load, background-service, and manual download parity gates: skipped because no device or emulator is connected.
 
+## Phase 6 â€” Native shell
+
+- Converted `KDownloaderApp` and `MainActivity` to Java. `MainActivity` now extends `AppCompatActivity` and hosts `HomeFragment`, `HistoryFragment`, and `SettingsFragment` with show/hide transactions so each tab keeps its state.
+- Added the native `CoordinatorLayout` shell, `FragmentContainerView`, Material 3 `BottomNavigationView`, three-item menu, and filled/outlined icon selectors. Tab transitions fade unless Reduce animations is enabled.
+- Added temporary Java bridge fragments plus `ComposeScreenBridge.kt`; each fragment still hosts its existing screen in a lifecycle-disposed `ComposeView`. These bridges are migration scaffolding and are scheduled for removal with their owning screens and the Phase 10 purity gate.
+- Preserved `ACTION_SEND` URL extraction with `https?://\\S+`, singleTop `onNewIntent` handling, runtime permission requests, pre-API-33 locale context wrapping, API-33 application locales, light/dark/system mapping, conditional dynamic colour, high-contrast overlay, and edge-to-edge system-bar insets.
+- The History navigation badge observes the same `DownloadEvents` map and counts only `PREPARING` and `RUNNING` entries.
+- Gates: `assembleDebug` and `testDebugUnitTest` passed; 65 JVM tests, zero failures. `verifyBundledYtDlp` also passed through `preBuild`.
+- Connected-device tab reachability, badge rendering, share-intent, locale, and visual gates: skipped because no device or emulator is connected.
+
 ## Pre-existing issues not fixed here
 
 - No device was available to identify runtime-only baseline issues.

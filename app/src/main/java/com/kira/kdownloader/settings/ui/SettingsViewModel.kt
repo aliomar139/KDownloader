@@ -43,7 +43,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val folders = FolderAccessManager(application)
     val system = SystemStatus(application)
 
-    private val settingsLive = repository.observe()
+    val settingsLive = repository.observe()
     private val settingsState = MutableStateFlow(repository.read())
     private val settingsObserver = Observer<AppSettings> { settingsState.value = it }
     val settings: StateFlow<AppSettings> = settingsState.asStateFlow()
