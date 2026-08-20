@@ -10,7 +10,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.kira.kdownloader.engine.DownloaderRepository;
 import com.kira.kdownloader.engine.MediaInfo;
 import com.kira.kdownloader.util.AppExecutors;
-import com.kira.kdownloader.util.RecentUrls;
 import com.kira.kdownloader.util.UrlExtractor;
 
 import java.util.LinkedHashMap;
@@ -73,7 +72,6 @@ public final class HomeViewModel extends AndroidViewModel {
                 repository.init();
                 MediaInfo info = repository.fetchInfo(url);
                 if (generation != fetchGeneration.get() || Thread.currentThread().isInterrupted()) return;
-                RecentUrls.add(getApplication(), url);
                 putCache(url, info);
                 state.postValue(new HomeUiState.Loaded(url, info));
             } catch (Throwable error) {

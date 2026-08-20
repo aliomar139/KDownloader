@@ -4,9 +4,7 @@ import android.animation.ObjectAnimator;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,7 +15,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,11 +25,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
@@ -44,8 +39,9 @@ import com.kira.kdownloader.engine.MediaInfo;
 import com.kira.kdownloader.service.DownloadEvents;
 import com.kira.kdownloader.service.DownloadService;
 import com.kira.kdownloader.util.FormattingKt;
+import com.kira.kdownloader.util.MediaOpener;
+import com.kira.kdownloader.util.ThumbnailBinder;
 import com.kira.kdownloader.util.MotionPreferences;
-import com.kira.kdownloader.util.RecentUrls;
 import com.kira.kdownloader.util.UrlExtractor;
 
 import java.util.ArrayList;
@@ -58,27 +54,25 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
     private static final String TAG = "HomeFragment";
 
     private String initialUrl = "";
-    private String clipboardSuggestion;
-    private String dismissedLink;
     private String handledCompletionKey;
     private String shownFailureKey;
     private HomeUiState.Loaded loadedState;
     private Map<String, DownloadEvents.State> downloadStates = Collections.emptyMap();
     private HomeViewModel viewModel;
     private ClipboardManager clipboard;
-    private ClipboardManager.OnPrimaryClipChangedListener clipboardListener;
     private View root;
     private TextInputEditText urlInput;
     private MaterialButton fetchButton;
     private MaterialButton activeDownloadsButton;
     private View urlCard;
-    private View clipboardBanner;
-    private TextView clipboardText;
     private View idleState, loadingState, resultState;
     private StateView errorState;
-    private LinearLayout recentUrls;
     private ImageView thumbnail;
     private TextView mediaTitle, mediaMeta;
+    private View progressCard;
+    private TextView progressTitle, progressPercent, progressDetail;
+    private LinearProgressIndicator progressBar;
+    private MaterialButton progressCancel;
     private FormatAdapter formatAdapter;
     private ObjectAnimator shimmer;
     private BottomSheetDialog downloadsDialog;
@@ -98,7 +92,6 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         if (getArguments() != null) initialUrl = getArguments().getString(ARG_INITIAL_URL, "");
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
-        clipboardListener = this::refreshClipboardSuggestion;
     }
 
     @NonNull @Override public View onCreateView(@NonNull LayoutInflater inflater,
@@ -113,16 +106,19 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         fetchButton = view.findViewById(R.id.fetch_button);
         activeDownloadsButton = view.findViewById(R.id.active_downloads_button);
         urlCard = view.findViewById(R.id.url_card);
-        clipboardBanner = view.findViewById(R.id.clipboard_banner);
-        clipboardText = view.findViewById(R.id.clipboard_text);
         idleState = view.findViewById(R.id.idle_state);
         loadingState = view.findViewById(R.id.loading_state);
         errorState = view.findViewById(R.id.error_state);
         resultState = view.findViewById(R.id.result_state);
-        recentUrls = view.findViewById(R.id.recent_urls);
         thumbnail = view.findViewById(R.id.media_thumbnail);
         mediaTitle = view.findViewById(R.id.media_title);
         mediaMeta = view.findViewById(R.id.media_meta);
+        progressCard = view.findViewById(R.id.download_progress_card);
+        progressTitle = view.findViewById(R.id.download_progress_title);
+        progressPercent = view.findViewById(R.id.download_progress_percent);
+        progressDetail = view.findViewById(R.id.download_progress_detail);
+        progressBar = view.findViewById(R.id.download_progress_bar);
+        progressCancel = view.findViewById(R.id.download_progress_cancel);
 
         RecyclerView formats = view.findViewById(R.id.formats_list);
         formats.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -135,7 +131,7 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
             fetch();
             return true;
         });
-        view.findViewById(R.id.paste_button).setOnClickListener(ignored -> pasteClipboard(false));
+        view.findViewById(R.id.paste_button).setOnClickListener(ignored -> pasteClipboard());
         view.findViewById(R.id.clear_button).setOnClickListener(ignored -> urlInput.setText(""));
         view.findViewById(R.id.change_link_button).setOnClickListener(ignored -> {
             viewModel.reset();
@@ -145,11 +141,6 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         idlePrompt.setState(R.drawable.ic_link, getString(R.string.ready_when_you_are), null);
         errorState.setState(R.drawable.ic_error_outline, getString(R.string.something_went_wrong), null);
         errorState.setAction(getString(R.string.try_again), ignored -> fetch());
-        view.findViewById(R.id.use_clipboard_button).setOnClickListener(ignored -> pasteClipboard(true));
-        view.findViewById(R.id.dismiss_clipboard_button).setOnClickListener(ignored -> {
-            dismissedLink = clipboardSuggestion;
-            clipboardBanner.setVisibility(View.GONE);
-        });
         activeDownloadsButton.setOnClickListener(ignored -> showActiveDownloads());
         ImageButton themeToggle = view.findViewById(R.id.theme_toggle);
         boolean dark = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
@@ -160,18 +151,6 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         viewModel.getState().observe(getViewLifecycleOwner(), this::renderState);
         DownloadEvents.getStates().live().observe(getViewLifecycleOwner(), this::renderDownloads);
         viewModel.warmUp();
-        refreshRecentUrls();
-    }
-
-    @Override public void onResume() {
-        super.onResume();
-        clipboard.addPrimaryClipChangedListener(clipboardListener);
-        refreshClipboardSuggestion();
-    }
-
-    @Override public void onPause() {
-        clipboard.removePrimaryClipChangedListener(clipboardListener);
-        super.onPause();
     }
 
     @Override public void onDestroyView() {
@@ -192,7 +171,6 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         if (root == null || state == null) return;
         showingResult = state instanceof HomeUiState.Loaded;
         urlCard.setVisibility(showingResult ? View.GONE : View.VISIBLE);
-        if (showingResult) clipboardBanner.setVisibility(View.GONE);
         idleState.setVisibility(state instanceof HomeUiState.Idle ? View.VISIBLE : View.GONE);
         loadingState.setVisibility(state instanceof HomeUiState.Loading ? View.VISIBLE : View.GONE);
         errorState.setVisibility(state instanceof HomeUiState.Error ? View.VISIBLE : View.GONE);
@@ -207,7 +185,7 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         } else if (state instanceof HomeUiState.Loaded) {
             loadedState = (HomeUiState.Loaded) state;
             renderLoaded(loadedState);
-        } else if (state instanceof HomeUiState.Idle) refreshRecentUrls();
+        }
     }
 
     private void renderLoaded(HomeUiState.Loaded loaded) {
@@ -220,15 +198,10 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         String duration = FormattingKt.formatDuration(info.getDurationSeconds());
         if (!duration.isEmpty()) metadata.add(duration);
         mediaMeta.setText(android.text.TextUtils.join(" · ", metadata));
-        if (info.getThumbnailUrl() == null) thumbnail.setImageResource(R.drawable.placeholder_video);
-        else {
-            RequestBuilder<Drawable> request = Glide.with(this).load(info.getThumbnailUrl());
-            if (!MotionPreferences.reduce(requireContext())) {
-                request = request.transition(DrawableTransitionOptions.withCrossFade(200));
-            }
-            request.placeholder(R.drawable.placeholder_video).error(R.drawable.placeholder_video).into(thumbnail);
-        }
+        ThumbnailBinder.bind(thumbnail, loaded.getSourceUrl(), "media:" + loaded.getSourceUrl(),
+                info.getThumbnailUrl(), null, false, R.drawable.placeholder_video, 256);
         formatAdapter.submit(loaded.getSourceUrl(), info.getChoices(), downloadStates);
+        renderProgressCard(downloadStates);
     }
 
     private void renderDownloads(Map<String, DownloadEvents.State> states) {
@@ -246,6 +219,7 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         activeDownloadsButton.setText(active.size() == 1 ? "1 download in progress · View"
                 : active.size() + " downloads in progress · View");
         if (activeDownloadAdapter != null) activeDownloadAdapter.submit(active);
+        renderProgressCard(states);
         if (active.isEmpty() && downloadsDialog != null) downloadsDialog.dismiss();
         if (failure != null && !failure.getKey().equals(shownFailureKey)) {
             shownFailureKey = failure.getKey();
@@ -255,6 +229,49 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
             handledCompletionKey = success.getKey();
             showCompletion(success.getKey(), success.getValue());
         }
+    }
+
+    /** The panel under the quality list: what is downloading right now, and a way to stop it. */
+    private void renderProgressCard(Map<String, DownloadEvents.State> states) {
+        if (progressCard == null) return;
+        String sourceUrl = loadedState == null ? null : loadedState.getSourceUrl();
+        DownloadEvents.State shown = null;
+        String shownLabel = null;
+        int running = 0;
+        if (sourceUrl != null) {
+            String prefix = DownloadEvents.keyOf(sourceUrl, "");
+            for (Map.Entry<String, DownloadEvents.State> entry : states.entrySet()) {
+                DownloadEvents.Phase phase = entry.getValue().getPhase();
+                if (phase != DownloadEvents.Phase.PREPARING && phase != DownloadEvents.Phase.RUNNING) continue;
+                if (!entry.getKey().startsWith(prefix)) continue;
+                running++;
+                if (shown == null) {
+                    shown = entry.getValue();
+                    shownLabel = entry.getKey().substring(prefix.length());
+                }
+            }
+        }
+        if (shown == null) {
+            progressCard.setVisibility(View.GONE);
+            return;
+        }
+        boolean preparing = shown.getPhase() == DownloadEvents.Phase.PREPARING || shown.getPercent() < 0;
+        int percent = Math.max(0, Math.min(100, shown.getPercent()));
+        progressCard.setVisibility(View.VISIBLE);
+        progressTitle.setText(shownLabel == null || shownLabel.trim().isEmpty()
+                ? shown.getTitle() : "Downloading " + shownLabel);
+        progressPercent.setText(preparing ? "" : percent + "%");
+        progressBar.setIndeterminate(preparing);
+        if (!preparing) progressBar.setProgressCompat(percent, true);
+        String remaining = FormattingKt.formatEta(shown.getEtaSeconds());
+        String eta = preparing ? "Preparing…"
+                : remaining.trim().isEmpty() ? "Downloading…" : remaining + " left";
+        progressDetail.setText(running > 1 ? eta + " · " + (running - 1) + " more in queue" : eta);
+        String processId = shown.getProcessId();
+        progressCancel.setEnabled(processId != null);
+        progressCancel.setOnClickListener(ignored -> {
+            if (processId != null) onCancel(processId);
+        });
     }
 
     @Override public void onDownload(DownloadChoice choice) {
@@ -306,57 +323,23 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
 
     private void openMedia(String fileUri, String kind) {
         Uri uri = Uri.parse(fileUri);
-        String mimeType = requireContext().getContentResolver().getType(uri);
-        if (mimeType == null || mimeType.trim().isEmpty()) {
-            mimeType = "AUDIO".equals(kind) ? "audio/*" : "video/*";
-        }
-        Intent intent = new Intent(Intent.ACTION_VIEW)
-                .setDataAndType(uri, mimeType)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        try { startActivity(Intent.createChooser(intent, "Open with")); }
-        catch (Throwable error) {
-            Log.w(TAG, "Could not open media", error);
-            Toast.makeText(requireContext(), R.string.couldn_t_open_this_file, Toast.LENGTH_SHORT).show();
-        }
+        MediaOpener.Result result = MediaOpener.open(
+                requireContext(), uri, "AUDIO".equalsIgnoreCase(kind));
+        if (result == MediaOpener.Result.LAUNCHED) return;
+        Log.w(TAG, "Could not open " + uri + ": " + result);
+        int message = result == MediaOpener.Result.NO_APP
+                ? R.string.no_app_on_this_device_can_open_this_file
+                : R.string.couldn_t_open_this_file;
+        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
     }
 
-    private void refreshRecentUrls() {
-        if (recentUrls == null) return;
-        recentUrls.removeAllViews();
-        for (String url : RecentUrls.all(requireContext())) {
-            MaterialButton button = (MaterialButton) getLayoutInflater().inflate(
-                    R.layout.view_recent_url, recentUrls, false);
-            button.setText(url);
-            button.setMaxLines(1);
-            button.setEllipsize(android.text.TextUtils.TruncateAt.END);
-            button.setOnClickListener(ignored -> { urlInput.setText(url); fetch(); });
-            recentUrls.addView(button);
-        }
-    }
-
-    private void refreshClipboardSuggestion() {
-        if (root == null) return;
+    private void pasteClipboard() {
         ClipData clip = clipboard.getPrimaryClip();
-        String value = clip == null || clip.getItemCount() == 0 ? null
-                : String.valueOf(clip.getItemAt(0).coerceToText(requireContext()));
-        String candidate = value == null ? null : UrlExtractor.fromText(value);
-        clipboardSuggestion = candidate != null && candidate.regionMatches(true, 0, "http", 0, 4)
-                ? candidate : null;
-        boolean show = !showingResult && clipboardSuggestion != null && !clipboardSuggestion.equals(text(urlInput))
-                && !clipboardSuggestion.equals(dismissedLink);
-        clipboardBanner.setVisibility(show ? View.VISIBLE : View.GONE);
-        if (show) clipboardText.setText("Link on clipboard · " + clipboardSuggestion);
-    }
-
-    private void pasteClipboard(boolean fetchNow) {
-        refreshClipboardSuggestion();
-        if (clipboardSuggestion != null) {
-            urlInput.setText(clipboardSuggestion);
-            if (fetchNow) fetch();
-            return;
-        }
-        ClipData clip = clipboard.getPrimaryClip();
-        if (clip != null && clip.getItemCount() > 0) urlInput.setText(clip.getItemAt(0).coerceToText(requireContext()));
+        if (clip == null || clip.getItemCount() == 0) return;
+        String value = String.valueOf(clip.getItemAt(0).coerceToText(requireContext()));
+        String link = UrlExtractor.fromText(value);
+        urlInput.setText(link != null && link.regionMatches(true, 0, "http", 0, 4) ? link : value);
+        urlInput.setSelection(text(urlInput).length());
     }
 
     private void startShimmer() {

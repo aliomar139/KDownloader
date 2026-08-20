@@ -291,11 +291,9 @@ public final class SettingsFragment extends Fragment {
     private void history(HistorySettings h) {
         toggle("Keep download history", null, h.getKeepHistory(), true, v -> vm.setHistory(h.withKeepHistory(v)));
         choice("Retention", HistoryRetention.values(), h.getRetention(), h.getKeepHistory(), v -> vm.setHistory(h.withRetention(v)));
-        toggle("Save recent URLs", null, h.getSaveRecentUrls(), true, v -> vm.setHistory(h.withSaveRecentUrls(v)));
         toggle("Save search history", null, h.getSaveSearchHistory(), true, v -> vm.setHistory(h.withSaveSearchHistory(v)));
         group("Clear data");
         action("Clear download history", null, R.drawable.ic_delete, () -> confirm("Clear download history?", "Downloaded files are not deleted.", vm::clearHistory));
-        action("Clear recent URLs", null, 0, vm::clearRecentUrls);
         action("Clear search history", null, 0, vm::clearSearchHistory);
         group("Backup");
         action("Export settings to a file", null, 0, () -> settingsDocument.launch("kdownloader-settings.json"));

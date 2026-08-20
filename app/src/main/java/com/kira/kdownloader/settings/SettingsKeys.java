@@ -98,7 +98,6 @@ public final class SettingsKeys {
 
     public static final String HS_KEEP = "history.keep";
     public static final String HS_RETENTION = "history.retention";
-    public static final String HS_RECENT_URLS = "history.recent_urls";
     public static final String HS_SEARCH = "history.search";
 
     public static final String PR_ENABLE = "processing.enable";
