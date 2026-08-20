@@ -1,6 +1,5 @@
 package com.kira.kdownloader.ui;
 
-import android.graphics.Bitmap;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -13,16 +12,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.color.MaterialColors;
 import com.kira.kdownloader.R;
 import com.kira.kdownloader.data.DownloadEntity;
 import com.kira.kdownloader.data.DownloadStatus;
-import com.kira.kdownloader.util.AppExecutors;
-import com.kira.kdownloader.util.MediaThumbnails;
-import com.kira.kdownloader.util.MotionPreferences;
+import com.kira.kdownloader.util.ThumbnailBinder;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -135,25 +129,9 @@ final class HistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private static void bindThumbnail(ImageView view, DownloadEntity download) {
         boolean audio = "AUDIO".equalsIgnoreCase(download.getKind());
-        int fallback = audio ? R.drawable.placeholder_audio : R.drawable.placeholder_video;
-        view.setTag(download.getId());
-        view.setImageResource(fallback);
-        if (download.getThumbnailUrl() != null) {
-            RequestBuilder<Drawable> request = Glide.with(view).load(download.getThumbnailUrl());
-            if (!MotionPreferences.reduce(view.getContext())) {
-                request = request.transition(DrawableTransitionOptions.withCrossFade(200));
-            }
-            request.placeholder(fallback).error(fallback).into(view);
-        } else if (download.getFileUri() != null) {
-            Bitmap cached = MediaThumbnails.peek(download.getFileUri(), 128);
-            if (cached != null) view.setImageBitmap(cached);
-            else AppExecutors.io().execute(() -> {
-                Bitmap bitmap = MediaThumbnails.load(view.getContext(), download.getFileUri(), audio, 128);
-                AppExecutors.main().execute(() -> {
-                    if (Long.valueOf(download.getId()).equals(view.getTag()) && bitmap != null) view.setImageBitmap(bitmap);
-                });
-            });
-        }
+        ThumbnailBinder.bind(view, download.getId(), "history:" + download.getId(),
+                download.getThumbnailUrl(), download.getFileUri(), audio,
+                audio ? R.drawable.placeholder_audio : R.drawable.placeholder_video, 128);
     }
 
     private static String dateBucket(long createdAt) {

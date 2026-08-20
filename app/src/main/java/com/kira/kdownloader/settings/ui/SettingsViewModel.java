@@ -33,7 +33,6 @@ import java.io.File;
 
 public final class SettingsViewModel extends AndroidViewModel {
     private static final String HISTORY_CACHE = "history_cache";
-    private static final String KEY_RECENT_URLS = "recent_urls";
     private static final String KEY_SEARCH_HISTORY = "search_history";
 
     private final SettingsRepository repository;
@@ -126,7 +125,6 @@ public final class SettingsViewModel extends AndroidViewModel {
         resetAll();
     }
 
-    public void clearRecentUrls() { prefs().edit().remove(KEY_RECENT_URLS).apply(); }
     public void clearSearchHistory() { prefs().edit().remove(KEY_SEARCH_HISTORY).apply(); }
 
     public String buildDiagnostics() {

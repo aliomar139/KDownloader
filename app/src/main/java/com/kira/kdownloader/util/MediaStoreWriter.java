@@ -7,24 +7,20 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.webkit.MimeTypeMap;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Locale;
 
 public final class MediaStoreWriter {
     private MediaStoreWriter() {}
 
-    public static Uri publish(Context context, File sourceFile, boolean isAudio) throws IOException {
+    public static Uri publish(Context context, File sourceFile) throws IOException {
         if (!sourceFile.isFile()) throw new IllegalArgumentException("Output file does not exist: " + sourceFile.getName());
         ContentResolver resolver = context.getContentResolver();
-        String extension = extension(sourceFile.getName()).toLowerCase(Locale.ROOT);
-        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-        if (mimeType == null) mimeType = isAudio ? "audio/*" : "video/*";
+        String mimeType = MediaMimeTypes.forStorage(sourceFile.getName());
         Uri collection = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
                 ? MediaStore.Downloads.EXTERNAL_CONTENT_URI : MediaStore.Files.getContentUri("external");
 
@@ -56,17 +52,16 @@ public final class MediaStoreWriter {
                 resolver.update(uri, complete, null, null);
             }
             if (!sourceFile.delete()) throw new IllegalStateException("Published file but could not delete temporary output");
-            return uri;
+            // Keep the audio/video address: the downloads one stops working once the app is
+            // reinstalled and MediaStore forgets that this row belonged to us.
+            return MediaMimeTypes.isPlayable(mimeType)
+                    ? MediaUris.inMediaCollection(uri, mimeType.startsWith("audio/"))
+                    : uri;
         } catch (Throwable error) {
             resolver.delete(uri, null, null);
             if (error instanceof IOException) throw (IOException) error;
             if (error instanceof RuntimeException) throw (RuntimeException) error;
             throw new RuntimeException(error);
         }
-    }
-
-    private static String extension(String name) {
-        int dot = name.lastIndexOf('.');
-        return dot < 0 ? "" : name.substring(dot + 1);
     }
 }

@@ -1,7 +1,6 @@
 package com.kira.kdownloader.ui;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -49,6 +48,7 @@ import com.kira.kdownloader.data.DownloadEntity;
 import com.kira.kdownloader.data.DownloadStatus;
 import com.kira.kdownloader.util.AppExecutors;
 import com.kira.kdownloader.util.DownloadDirectoryScanner;
+import com.kira.kdownloader.util.MediaOpener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,8 +92,7 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
         adapter = new HistoryAdapter(this);
         listView.setLayoutManager(new LinearLayoutManager(requireContext()));
         listView.setAdapter(adapter);
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
-                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override public boolean onMove(@NonNull RecyclerView recyclerView,
                                             @NonNull RecyclerView.ViewHolder a,
                                             @NonNull RecyclerView.ViewHolder b) { return false; }
@@ -110,9 +109,7 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
                 paint.setColor(MaterialColors.getColor(item,
                         com.google.android.material.R.attr.colorErrorContainer));
                 float radius = dp(16);
-                RectF bounds = dX > 0
-                        ? new RectF(item.getLeft(), item.getTop(), item.getLeft() + dX, item.getBottom())
-                        : new RectF(item.getRight() + dX, item.getTop(), item.getRight(), item.getBottom());
+                RectF bounds = new RectF(item.getLeft(), item.getTop(), item.getLeft() + dX, item.getBottom());
                 canvas.drawRoundRect(bounds, radius, radius, paint);
                 Drawable icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_delete);
                 if (icon != null) {
@@ -121,7 +118,7 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
                             com.google.android.material.R.attr.colorOnErrorContainer));
                     int size = dp(24);
                     int top = item.getTop() + (item.getHeight() - size) / 2;
-                    int left = dX > 0 ? item.getLeft() + dp(16) : item.getRight() - dp(16) - size;
+                    int left = item.getLeft() + dp(16);
                     icon.setBounds(left, top, left + size, top + size);
                     icon.draw(canvas);
                 }
@@ -239,18 +236,36 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
             return;
         }
         Uri uri = Uri.parse(download.getFileUri());
-        String mimeType = requireContext().getContentResolver().getType(uri);
-        if (mimeType == null || mimeType.trim().isEmpty()) {
-            mimeType = "AUDIO".equals(download.getKind()) ? "audio/*" : "video/*";
+        boolean audio = "AUDIO".equalsIgnoreCase(download.getKind());
+        report(MediaOpener.open(requireContext(), uri, audio), download,
+                R.string.couldn_t_open_this_file, R.string.no_app_on_this_device_can_open_this_file);
+    }
+
+    /** Explains why a file could not be handed to another app, and offers to prune dead entries. */
+    private void report(MediaOpener.Result result, DownloadEntity download, int failedMessage, int noAppMessage) {
+        switch (result) {
+            case LAUNCHED:
+                return;
+            case MISSING:
+                Log.w(TAG, "Missing file for " + download.getTitle() + " at " + download.getFileUri());
+                offerToForget(download);
+                return;
+            case NO_APP:
+                Toast.makeText(requireContext(), noAppMessage, Toast.LENGTH_LONG).show();
+                return;
+            default:
+                Toast.makeText(requireContext(), failedMessage, Toast.LENGTH_SHORT).show();
         }
-        Intent intent = new Intent(Intent.ACTION_VIEW)
-                .setDataAndType(uri, mimeType)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        try { startActivity(Intent.createChooser(intent, "Open with")); }
-        catch (Throwable error) {
-            Log.w(TAG, "Could not open " + download.getTitle(), error);
-            Toast.makeText(requireContext(), R.string.couldn_t_open_this_file, Toast.LENGTH_SHORT).show();
-        }
+    }
+
+    private void offerToForget(DownloadEntity download) {
+        new MaterialAlertDialogBuilder(requireContext()).setIcon(R.drawable.ic_error_outline)
+                .setTitle(R.string.file_not_found)
+                .setMessage(download.getTitle() + "\n\n"
+                        + getString(R.string.this_file_is_no_longer_in_storage_it_may_have_been_moved_or_deleted))
+                .setNegativeButton(R.string.keep, null)
+                .setPositiveButton(R.string.remove_from_history, (dialog, which) -> delete(download, false))
+                .show();
     }
 
     @Override public void onDetails(DownloadEntity download) {
@@ -277,19 +292,10 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
     private void share(DownloadEntity download) {
         if (download.getFileUri() == null) return;
         Uri uri = Uri.parse(download.getFileUri());
-        String mimeType = requireContext().getContentResolver().getType(uri);
-        if (mimeType == null || mimeType.trim().isEmpty()) {
-            mimeType = "AUDIO".equals(download.getKind()) ? "audio/*" : "video/*";
-        }
-        Intent intent = new Intent(Intent.ACTION_SEND)
-                .setType(mimeType)
-                .putExtra(Intent.EXTRA_STREAM, uri)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        try { startActivity(Intent.createChooser(intent, "Share")); }
-        catch (Throwable error) {
-            Log.w(TAG, "Could not share " + download.getTitle(), error);
-            Toast.makeText(requireContext(), R.string.no_app_available_to_share_this_file, Toast.LENGTH_SHORT).show();
-        }
+        boolean audio = "AUDIO".equalsIgnoreCase(download.getKind());
+        report(MediaOpener.share(requireContext(), uri, audio), download,
+                R.string.no_app_available_to_share_this_file,
+                R.string.no_app_available_to_share_this_file);
     }
 
     private void addAction(GridLayout parent, String label, int icon, Runnable action) {

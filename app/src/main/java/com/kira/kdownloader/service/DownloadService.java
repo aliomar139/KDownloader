@@ -155,9 +155,7 @@ public final class DownloadService extends Service {
                                     DownloadEvents.Phase.RUNNING, percent, title,
                                     choice.getKind().name(), null, null, etaSeconds, processId));
                         });
-                Uri outputUri = MediaStoreWriter.publish(
-                        getApplicationContext(), outputFile,
-                        choice.getKind() == FormatSelector.Kind.AUDIO);
+                Uri outputUri = MediaStoreWriter.publish(getApplicationContext(), outputFile);
 
                 dao.updateStatusAndUri(insertedId, DownloadStatus.COMPLETED, outputUri.toString());
                 DownloadEvents.update(eventKey, new DownloadEvents.State(
