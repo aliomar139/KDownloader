@@ -137,6 +137,7 @@
     <string name="faster_processing" formatted="false">Faster processing</string>
     <string name="fetching" formatted="false">Fetching…</string>
     <string name="file_names" formatted="false">File names</string>
+    <string name="file_not_found" formatted="false">File not found</string>
     <string name="filename_template" formatted="false">Filename template</string>
     <string name="folders" formatted="false">Folders</string>
     <string name="folders_filenames_temporary_files" formatted="false">Folders, filenames, temporary files</string>
@@ -157,6 +158,7 @@
     <string name="import_settings_from_a_file" formatted="false">Import settings from a file</string>
     <string name="include_all_available_languages" formatted="false">Include all available languages</string>
     <string name="kdownloader" formatted="false">KDownloader</string>
+    <string name="keep" formatted="false">Keep</string>
     <string name="keep_download_history" formatted="false">Keep download history</string>
     <string name="keep_the_screen_awake_during_downloads" formatted="false">Keep the screen awake during downloads</string>
     <string name="language" formatted="false">Language</string>
@@ -191,6 +193,7 @@
     <string name="no_active_downloads" formatted="false">No active downloads.</string>
     <string name="no_app_available_to_share_this_file" formatted="false">No app available to share this file</string>
     <string name="no_app_can_handle_this_action" formatted="false">No app can handle this action</string>
+    <string name="no_app_on_this_device_can_open_this_file" formatted="false">No app on this device can open this file</string>
     <string name="no_downloads_match_your_search" formatted="false">No downloads match your search.</string>
     <string name="no_downloads_yet" formatted="false">No downloads yet</string>
     <string name="no_saved_file_is_linked_to_this_entry_only_the_history_record_will_be" formatted="false">No saved file is linked to this entry; only the history record will be removed.</string>
@@ -255,6 +258,7 @@
     <string name="recent_links" formatted="false">Recent links</string>
     <string name="reduce_animations" formatted="false">Reduce animations</string>
     <string name="remove_all_history_entries_downloaded_files_are_kept" formatted="false">Remove all history entries. Downloaded files are kept.</string>
+    <string name="remove_from_history" formatted="false">Remove from history</string>
     <string name="remove_the_list_of_recently_used_urls" formatted="false">Remove the list of recently used URLs.</string>
     <string name="remove_your_saved_searches" formatted="false">Remove your saved searches.</string>
     <string name="replace_after_confirmation" formatted="false">Replace after confirmation</string>
@@ -323,6 +327,7 @@
     <string name="theme_language_list_motion" formatted="false">Theme, language, list, motion</string>
     <string name="this_app_can_continue_downloads_reliably_in_the_background" formatted="false">This app can continue downloads reliably in the background.</string>
     <string name="this_download_has_no_saved_file" formatted="false">This download has no saved file</string>
+    <string name="this_file_is_no_longer_in_storage_it_may_have_been_moved_or_deleted" formatted="false">This file is no longer in storage. It may have been moved or deleted by another app.</string>
     <string name="this_removes_intermediate_and_cache_files_only_completed_downloads_are" formatted="false">This removes intermediate and cache files only. Completed downloads are kept.</string>
     <string name="this_removes_the_entry_from_your_history" formatted="false">This removes the entry from your history.</string>
     <string name="today" formatted="false">Today</string>

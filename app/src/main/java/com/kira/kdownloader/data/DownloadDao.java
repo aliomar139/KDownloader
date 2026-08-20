@@ -21,6 +21,9 @@ public interface DownloadDao {
     @Query("UPDATE downloads SET status = :status, fileUri = :fileUri WHERE id = :id")
     void updateStatusAndUri(long id, DownloadStatus status, @Nullable String fileUri);
 
+    @Query("UPDATE downloads SET fileUri = :fileUri WHERE id = :id")
+    void updateFileUri(long id, @Nullable String fileUri);
+
     @Nullable @Query("SELECT * FROM downloads WHERE id = :id") DownloadEntity getById(long id);
     @Query("SELECT fileUri FROM downloads WHERE fileUri IS NOT NULL") List<String> getAllFileUris();
     @Query("DELETE FROM downloads WHERE id = :id") void deleteById(long id);

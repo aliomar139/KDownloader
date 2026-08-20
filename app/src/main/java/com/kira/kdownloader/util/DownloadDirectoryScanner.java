@@ -1,6 +1,7 @@
 package com.kira.kdownloader.util;
 
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -48,6 +49,7 @@ public final class DownloadDirectoryScanner {
             long now = System.currentTimeMillis();
             if (!force && lastScanAtMs != 0 && now - lastScanAtMs < MIN_RESCAN_INTERVAL_MS) return 0;
 
+            repairFileUris(context, dao);
             Set<String> existingUris = new HashSet<>(dao.getAllFileUris());
             Set<Long> existingIds = new HashSet<>();
             for (String uri : existingUris) {
@@ -122,8 +124,10 @@ public final class DownloadDirectoryScanner {
             int pathColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.RELATIVE_PATH);
             while (cursor.moveToNext()) {
                 if (!isSupportedRelativePath(cursor.getString(pathColumn))) continue;
-                ScannedMedia media = scannedMedia(collection, cursor.getLong(idColumn), cursor.getString(nameColumn),
-                        cursor.getString(mimeColumn), cursor.getLong(dateColumn));
+                long id = cursor.getLong(idColumn);
+                String name = cursor.getString(nameColumn);
+                String mimeType = repairMimeType(context, collection, id, name, cursor.getString(mimeColumn));
+                ScannedMedia media = scannedMedia(collection, id, name, mimeType, cursor.getLong(dateColumn));
                 if (media != null) result.add(media);
             }
         }
@@ -154,18 +158,43 @@ public final class DownloadDirectoryScanner {
             int pathColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
             while (cursor.moveToNext()) {
                 if (!isSupportedLegacyPath(cursor.getString(pathColumn))) continue;
-                ScannedMedia media = scannedMedia(collection, cursor.getLong(idColumn), cursor.getString(nameColumn),
-                        cursor.getString(mimeColumn), cursor.getLong(dateColumn));
+                long id = cursor.getLong(idColumn);
+                String name = cursor.getString(nameColumn);
+                String mimeType = repairMimeType(context, collection, id, name, cursor.getString(mimeColumn));
+                ScannedMedia media = scannedMedia(collection, id, name, mimeType, cursor.getLong(dateColumn));
                 if (media != null) result.add(media);
             }
         }
         return result;
     }
 
+    /**
+     * Earlier releases published files with a wildcard MIME type, which leaves MediaStore unable
+     * to classify the row: no thumbnail is generated and players refuse the open intent. Rewrite
+     * those rows in place once we see them.
+     */
+    private static String repairMimeType(Context context, Uri collection, long id, String name, String mimeType) {
+        if (MediaMimeTypes.isPlayable(mimeType)) return mimeType;
+        String corrected = MediaMimeTypes.fromFileName(name);
+        if (corrected == null || corrected.equals(mimeType)) return mimeType;
+        try {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.MIME_TYPE, corrected);
+            context.getContentResolver().update(ContentUris.withAppendedId(collection, id), values, null, null);
+        } catch (Throwable error) {
+            Log.d(TAG, "Could not correct the MIME type of " + name, error);
+        }
+        return corrected;
+    }
+
     private static ScannedMedia scannedMedia(Uri collection, long id, String name, String mimeType, long dateAddedSeconds) {
         if (name == null) return null;
+        String kind = kindOf(name, mimeType);
+        if (kind == null) return null;
         long createdAt = dateAddedSeconds > 0 ? dateAddedSeconds * 1000L : System.currentTimeMillis();
-        DownloadEntity entity = entityFrom(name, mimeType, ContentUris.withAppendedId(collection, id).toString(), createdAt);
+        Uri uri = MediaUris.inMediaCollection(
+                ContentUris.withAppendedId(collection, id), "AUDIO".equals(kind));
+        DownloadEntity entity = entityFrom(name, mimeType, uri.toString(), createdAt);
         return entity == null ? null : new ScannedMedia(id, entity);
     }
 
@@ -189,10 +218,8 @@ public final class DownloadDirectoryScanner {
 
     static DownloadEntity entityFrom(String displayName, String mimeType, String fileUri, long createdAt) {
         String extension = extension(displayName).toLowerCase(Locale.ROOT);
-        String kind;
-        if ((mimeType != null && mimeType.startsWith("audio/")) || AUDIO_EXTENSIONS.contains(extension)) kind = "AUDIO";
-        else if ((mimeType != null && mimeType.startsWith("video/")) || VIDEO_EXTENSIONS.contains(extension)) kind = "VIDEO";
-        else return null;
+        String kind = kindOf(displayName, mimeType);
+        if (kind == null) return null;
 
         int dot = displayName.lastIndexOf('.');
         String title = dot < 0 ? displayName : displayName.substring(0, dot);
@@ -200,6 +227,32 @@ public final class DownloadDirectoryScanner {
         String label = extension.toUpperCase(Locale.ROOT);
         if (label.trim().isEmpty()) label = "AUDIO".equals(kind) ? "Audio" : "Video";
         return new DownloadEntity(0L, title, "", kind, label, fileUri, null, createdAt, DownloadStatus.COMPLETED);
+    }
+
+    /** {@code AUDIO}, {@code VIDEO}, or {@code null} when the file is neither. */
+    static String kindOf(String displayName, String mimeType) {
+        String extension = extension(displayName).toLowerCase(Locale.ROOT);
+        if ((mimeType != null && mimeType.startsWith("audio/")) || AUDIO_EXTENSIONS.contains(extension)) return "AUDIO";
+        if ((mimeType != null && mimeType.startsWith("video/")) || VIDEO_EXTENSIONS.contains(extension)) return "VIDEO";
+        return null;
+    }
+
+    /**
+     * Rewrites saved addresses that the app can no longer read after a reinstall, so entries from
+     * earlier installs keep opening and keep showing thumbnails.
+     */
+    private static void repairFileUris(Context context, DownloadDao dao) {
+        for (DownloadEntity entry : dao.getAllSync()) {
+            String stored = entry.getFileUri();
+            if (stored == null || stored.trim().isEmpty()) continue;
+            boolean audio = "AUDIO".equalsIgnoreCase(entry.getKind());
+            Uri uri = Uri.parse(stored);
+            if (MediaUris.inMediaCollection(uri, audio).toString().equals(stored)) continue;
+            Uri readable = MediaUris.readable(context, uri, audio);
+            if (readable == null || readable.toString().equals(stored)) continue;
+            Log.i(TAG, "Repairing saved address for " + entry.getTitle());
+            dao.updateFileUri(entry.getId(), readable.toString());
+        }
     }
 
     private static Long mediaStoreIdFrom(String uriString) {
