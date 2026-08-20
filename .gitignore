@@ -1,6 +1,5 @@
 *.iml
 .gradle/
-.kotlin/
 /local.properties
 /.idea/
 /build/
@@ -8,3 +7,11 @@
 /captures/
 .externalNativeBuild/
 .cxx/
+
+# Local design-revamp working files
+/.hallmark/
+/DESIGN_REVAMP_PROMPT.md
+/DESIGN_SYSTEM.md
+/design.md
+/tokens.css
+/tools/

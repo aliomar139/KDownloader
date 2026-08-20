@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hallmark · pre-emit critique: P5 H5 E4 S5 R5 V4
+     Hallmark · genre: modern-minimal · macrostructure: Workbench · design-system: DESIGN_REVAMP_PROMPT.md · designed-as-app -->
+<resources>
+    <style name="ShapeAppearance.KDownloader.ExtraSmall" parent="ShapeAppearance.Material3.Corner.ExtraSmall"><item name="cornerSize">8dp</item></style>
+    <style name="ShapeAppearance.KDownloader.Small" parent="ShapeAppearance.Material3.Corner.Small"><item name="cornerSize">12dp</item></style>
+    <style name="ShapeAppearance.KDownloader.Medium" parent="ShapeAppearance.Material3.Corner.Medium"><item name="cornerSize">16dp</item></style>
+    <style name="ShapeAppearance.KDownloader.Large" parent="ShapeAppearance.Material3.Corner.Large"><item name="cornerSize">20dp</item></style>
+    <style name="ShapeAppearance.KDownloader.ExtraLarge" parent="ShapeAppearance.Material3.Corner.ExtraLarge"><item name="cornerSize">28dp</item></style>
+    <style name="ShapeAppearance.KDownloader.Pill" parent=""><item name="cornerFamily">rounded</item><item name="cornerSize">999dp</item></style>
+
+    <style name="TextAppearance.KDownloader.Display" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:fontFamily">@font/inter_semibold</item><item name="fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">28sp</item><item name="lineHeight">34sp</item><item name="android:letterSpacing">-0.0143</item>
+    </style>
+    <style name="TextAppearance.KDownloader.HeadlineMedium" parent="TextAppearance.KDownloader.Display" />
+    <style name="TextAppearance.KDownloader.HeadlineSmall" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:fontFamily">@font/inter_semibold</item><item name="fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">22sp</item><item name="lineHeight">28sp</item><item name="android:letterSpacing">-0.0091</item>
+    </style>
+    <style name="TextAppearance.KDownloader.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:fontFamily">@font/inter_semibold</item><item name="fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">18sp</item><item name="lineHeight">24sp</item>
+    </style>
+    <style name="TextAppearance.KDownloader.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:fontFamily">@font/inter_semibold</item><item name="fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">16sp</item><item name="lineHeight">22sp</item>
+    </style>
+    <style name="TextAppearance.KDownloader.TitleSmall" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:fontFamily">@font/inter_medium</item><item name="fontFamily">@font/inter_medium</item>
+        <item name="android:textSize">14sp</item><item name="lineHeight">20sp</item>
+    </style>
+    <style name="TextAppearance.KDownloader.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:fontFamily">@font/inter_regular</item><item name="fontFamily">@font/inter_regular</item>
+        <item name="android:textSize">16sp</item><item name="lineHeight">24sp</item>
+    </style>
+    <style name="TextAppearance.KDownloader.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:fontFamily">@font/inter_regular</item><item name="fontFamily">@font/inter_regular</item>
+        <item name="android:textSize">14sp</item><item name="lineHeight">21sp</item>
+    </style>
+    <style name="TextAppearance.KDownloader.BodySmall" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:fontFamily">@font/inter_regular</item><item name="fontFamily">@font/inter_regular</item>
+        <item name="android:textSize">12sp</item><item name="lineHeight">18sp</item>
+    </style>
+    <style name="TextAppearance.KDownloader.LabelLarge" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:fontFamily">@font/inter_semibold</item><item name="fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">14sp</item><item name="lineHeight">20sp</item><item name="android:letterSpacing">0.0071</item>
+    </style>
+    <style name="TextAppearance.KDownloader.LabelMedium" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:fontFamily">@font/inter_medium</item><item name="fontFamily">@font/inter_medium</item>
+        <item name="android:textSize">12sp</item><item name="lineHeight">16sp</item><item name="android:letterSpacing">0.0167</item>
+    </style>
+    <style name="TextAppearance.KDownloader.LabelSmall" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:fontFamily">@font/inter_medium</item><item name="fontFamily">@font/inter_medium</item>
+        <item name="android:textSize">11sp</item><item name="lineHeight">16sp</item><item name="android:letterSpacing">0.0455</item>
+    </style>
+    <style name="TextAppearance.KDownloader.Numeric" parent="TextAppearance.KDownloader.BodySmall">
+        <item name="android:fontFamily">@font/inter_medium</item><item name="fontFamily">@font/inter_medium</item>
+        <item name="android:textSize">13sp</item><item name="lineHeight">18sp</item><item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <style name="Widget.KDownloader.Button" parent="Widget.Material3.Button">
+        <item name="android:minHeight">48dp</item><item name="shapeAppearance">@style/ShapeAppearance.KDownloader.Medium</item>
+        <item name="android:textAppearance">@style/TextAppearance.KDownloader.LabelLarge</item><item name="iconSize">20dp</item><item name="iconPadding">8dp</item>
+    </style>
+    <style name="Widget.KDownloader.Button.Primary" parent="Widget.KDownloader.Button"><item name="backgroundTint">?attr/colorPrimary</item><item name="android:textColor">?attr/colorOnPrimary</item><item name="iconTint">?attr/colorOnPrimary</item></style>
+    <style name="Widget.KDownloader.Button.Primary.Home"><item name="android:minHeight">52dp</item></style>
+    <style name="Widget.KDownloader.Button.Tonal" parent="Widget.Material3.Button.TonalButton">
+        <item name="android:minHeight">48dp</item><item name="shapeAppearance">@style/ShapeAppearance.KDownloader.Medium</item><item name="android:textAppearance">@style/TextAppearance.KDownloader.LabelLarge</item>
+        <item name="backgroundTint">?attr/colorPrimaryContainer</item><item name="android:textColor">?attr/colorOnPrimaryContainer</item><item name="iconTint">?attr/colorOnPrimaryContainer</item>
+    </style>
+    <style name="Widget.KDownloader.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">48dp</item><item name="shapeAppearance">@style/ShapeAppearance.KDownloader.Medium</item><item name="android:textAppearance">@style/TextAppearance.KDownloader.LabelLarge</item><item name="strokeColor">?attr/colorOutline</item><item name="android:textColor">?attr/brandAccent</item><item name="iconTint">?attr/brandAccent</item>
+    </style>
+    <style name="Widget.KDownloader.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:minHeight">48dp</item><item name="android:textAppearance">@style/TextAppearance.KDownloader.LabelLarge</item><item name="android:textColor">?attr/brandAccent</item><item name="iconTint">?attr/brandAccent</item>
+    </style>
+    <style name="Widget.KDownloader.IconButton" parent="Widget.Material3.Button.IconButton">
+        <item name="android:minWidth">48dp</item><item name="android:minHeight">48dp</item><item name="iconTint">?attr/colorOnSurfaceVariant</item>
+    </style>
+    <style name="Widget.KDownloader.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/theme_card_surface</item><item name="cardElevation">0dp</item><item name="strokeWidth">1dp</item><item name="strokeColor">?attr/colorOutlineVariant</item><item name="shapeAppearance">@style/ShapeAppearance.KDownloader.Medium</item>
+    </style>
+    <style name="Widget.KDownloader.Card.Format" parent="Widget.KDownloader.Card">
+        <item name="cardBackgroundColor">?attr/colorSurfaceContainerHigh</item><item name="strokeColor">?attr/colorOutline</item><item name="cardElevation">1dp</item>
+    </style>
+    <style name="Widget.KDownloader.Card.Hero" parent="Widget.KDownloader.Card"><item name="shapeAppearance">@style/ShapeAppearance.KDownloader.Large</item></style>
+    <style name="Widget.KDownloader.TextField" parent="Widget.Material3.TextInputLayout.FilledBox">
+        <item name="boxBackgroundColor">?attr/colorSurfaceContainer</item><item name="boxStrokeColor">?attr/brandAccent</item><item name="boxStrokeWidth">0dp</item><item name="boxStrokeWidthFocused">2dp</item><item name="shapeAppearance">@style/ShapeAppearance.KDownloader.Medium</item><item name="hintTextColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+    <style name="Widget.KDownloader.Chip" parent="Widget.Material3.Chip.Filter">
+        <item name="android:minHeight">36dp</item><item name="shapeAppearance">@style/ShapeAppearance.KDownloader.Pill</item><item name="android:textAppearance">@style/TextAppearance.KDownloader.LabelMedium</item><item name="chipStrokeWidth">1dp</item><item name="chipStrokeColor">?attr/colorOutlineVariant</item>
+    </style>
+    <style name="Widget.KDownloader.BottomNavigation" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">?attr/colorSurfaceContainerLow</item><item name="itemActiveIndicatorStyle">@style/Widget.KDownloader.BottomNavigation.ActiveIndicator</item><item name="itemTextAppearanceActive">@style/TextAppearance.KDownloader.LabelMedium</item><item name="itemTextAppearanceInactive">@style/TextAppearance.KDownloader.LabelMedium</item><item name="elevation">0dp</item>
+    </style>
+    <style name="Widget.KDownloader.BottomNavigation.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator"><item name="android:color">?attr/colorPrimaryContainer</item><item name="shapeAppearance">@style/ShapeAppearance.KDownloader.Pill</item></style>
+    <style name="Widget.KDownloader.Toolbar" parent="Widget.Material3.Toolbar"><item name="android:minHeight">64dp</item><item name="titleTextAppearance">@style/TextAppearance.KDownloader.HeadlineSmall</item><item name="titleTextColor">?attr/colorOnSurface</item><item name="navigationIconTint">?attr/colorOnSurface</item></style>
+    <style name="ThemeOverlay.KDownloader.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog"><item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.KDownloader.ExtraLarge</item><item name="colorSurface">?attr/colorSurfaceContainerHigh</item></style>
+    <style name="ThemeOverlay.KDownloader.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog"><item name="bottomSheetStyle">@style/Widget.KDownloader.BottomSheet</item></style>
+    <style name="Widget.KDownloader.BottomSheet" parent="Widget.Material3.BottomSheet.Modal"><item name="backgroundTint">?attr/colorSurfaceContainerHigh</item><item name="shapeAppearance">@style/ShapeAppearance.KDownloader.ExtraLarge</item></style>
+</resources>

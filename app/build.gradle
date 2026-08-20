@@ -1,0 +1,116 @@
+import java.security.MessageDigest
+
+plugins {
+    id 'com.android.application'
+}
+
+// This app-level raw resource overrides youtubedl-android's bundled yt-dlp.
+// Source: https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/tag/2026.08.19.233000
+def bundledYtDlpVersion = '2026.08.19.233000'
+def bundledYtDlpSha256 = '972baad24f3ad08f99b893ae27cf359934eeed2359d39b5d090f022b70ba54a8'
+
+android {
+    namespace = 'com.kira.kdownloader'
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = 'com.kira.kdownloader'
+        minSdk = 24
+        targetSdk = 35
+        versionCode = 1
+        versionName = '1.0'
+
+        buildConfigField 'String', 'BUNDLED_YTDLP_VERSION', "\"${bundledYtDlpVersion}\""
+
+        testInstrumentationRunner = 'androidx.test.runner.AndroidJUnitRunner'
+
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+}
+
+def verifyBundledYtDlp = tasks.register('verifyBundledYtDlp') {
+    group = 'verification'
+    description = 'Verifies the yt-dlp executable bundled in the APK'
+
+    def binary = layout.projectDirectory.file('src/main/res/raw/ytdlp')
+    inputs.file(binary)
+
+    doLast {
+        def file = binary.asFile
+        if (!file.isFile()) {
+            throw new GradleException("Bundled yt-dlp is missing: ${file.absolutePath}")
+        }
+        def actualSha256 = MessageDigest.getInstance('SHA-256').digest(file.bytes)
+                .collect { String.format('%02x', it & 0xff) }.join('')
+        if (actualSha256 != bundledYtDlpSha256) {
+            throw new GradleException("Bundled yt-dlp checksum mismatch: expected ${bundledYtDlpSha256}, got ${actualSha256}")
+        }
+    }
+}
+
+tasks.named('preBuild').configure {
+    dependsOn verifyBundledYtDlp
+}
+
+dependencies {
+    def ytdlVersion = '0.18.1'
+    implementation "io.github.junkfood02.youtubedl-android:library:${ytdlVersion}"
+    implementation "io.github.junkfood02.youtubedl-android:ffmpeg:${ytdlVersion}"
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
+
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.activity:activity:1.9.2'
+    implementation 'androidx.fragment:fragment:1.8.4'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.core:core-splashscreen:1.0.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime:2.8.6'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.8.6'
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.8.6'
+    implementation 'androidx.annotation:annotation:1.8.2'
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+
+    // Settings: Keystore-backed secure storage for proxy credentials.
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    // Settings: Storage Access Framework folder handling (readable names, revocation checks).
+    implementation 'androidx.documentfile:documentfile:1.0.1'
+    def roomVersion = '2.6.1'
+    implementation "androidx.room:room-runtime:${roomVersion}"
+    annotationProcessor "androidx.room:room-compiler:${roomVersion}"
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'androidx.arch.core:core-testing:2.2.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test:core:1.6.1'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation "androidx.room:room-testing:${roomVersion}"
+}

@@ -1,3 +1,377 @@
 <resources>
     <string name="app_name">KDownloader</string>
+    <string name="about" formatted="false">About</string>
+    <string name="about_and_support" formatted="false">About &amp; support</string>
+    <string name="add_language_codes_to_filenames" formatted="false">Add language codes to filenames</string>
+    <string name="add_new_downloads_to" formatted="false">Add new downloads to</string>
+    <string name="advanced_processing" formatted="false">Advanced processing</string>
+    <string name="after_completion" formatted="false">After completion</string>
+    <string name="alerts" formatted="false">Alerts</string>
+    <string name="all" formatted="false">All</string>
+    <string name="allow_automatically_generated" formatted="false">Allow automatically generated</string>
+    <string name="allow_downloads_while_roaming" formatted="false">Allow downloads while roaming</string>
+    <string name="allow_notifications" formatted="false">Allow notifications</string>
+    <string name="allow_processing_in_the_background" formatted="false">Allow processing in the background</string>
+    <string name="allowed" formatted="false">Allowed</string>
+    <string name="allowed_networks" formatted="false">Allowed networks</string>
+    <string name="allowed_networks_mobile_data_proxy" formatted="false">Allowed networks, mobile data, proxy</string>
+    <string name="also_delete_the_file_from_storage" formatted="false">Also delete the file from storage</string>
+    <string name="also_save_subtitles_as_separate_files" formatted="false">Also save subtitles as separate files</string>
+    <string name="any_network" formatted="false">Any network</string>
+    <string name="app" formatted="false">App</string>
+    <string name="app_language" formatted="false">App language</string>
+    <string name="app_theme" formatted="false">App theme</string>
+    <string name="appearance_and_accessibility" formatted="false">Appearance &amp; accessibility</string>
+    <string name="applies_to_new_downloads_only" formatted="false">applies to new downloads only</string>
+    <string name="are_not_deleted" formatted="false">are not deleted.</string>
+    <string name="ask_before_each_download" formatted="false">Ask before each download</string>
+    <string name="ask_every_time" formatted="false">Ask every time</string>
+    <string name="ask_for_confirmation_before_downloading" formatted="false">Ask for confirmation before downloading</string>
+    <string name="audio" formatted="false">AUDIO</string>
+    <string name="audio_folder_optional" formatted="false">Audio folder (optional)</string>
+    <string name="audio_format" formatted="false">Audio format</string>
+    <string name="audio_only" formatted="false">Audio only</string>
+    <string name="automatically_add_a_number" formatted="false">Automatically add a number</string>
+    <string name="automatically_fall_back" formatted="false">Automatically fall back</string>
+    <string name="automatically_resume_interrupted_downloads" formatted="false">Automatically resume interrupted downloads</string>
+    <string name="automatically_retry_when_connectivity_returns" formatted="false">Automatically retry when connectivity returns</string>
+    <string name="available_formats" formatted="false">Available formats</string>
+    <string name="choose_format_hint" formatted="false">Choose a quality or download audio only</string>
+    <string name="change_link" formatted="false">Change link</string>
+    <string name="back" formatted="false">Back</string>
+    <string name="background_activity" formatted="false">Background activity</string>
+    <string name="background_downloads_may_be_interrupted_exempt_the_app_from_battery_op" formatted="false">Background downloads may be interrupted. Exempt the app from battery optimization for reliable long downloads.</string>
+    <string name="backup" formatted="false">Backup</string>
+    <string name="balanced" formatted="false">Balanced</string>
+    <string name="battery_optimization_exemption" formatted="false">Battery optimization exemption</string>
+    <string name="best" formatted="false">Best</string>
+    <string name="best_available" formatted="false">Best available</string>
+    <string name="best_compatible_format" formatted="false">Best compatible format</string>
+    <string name="bottom_of_queue" formatted="false">Bottom of queue</string>
+    <string name="build_number" formatted="false">Build number</string>
+    <string name="by_channel" formatted="false">By channel</string>
+    <string name="by_media_type" formatted="false">By media type</string>
+    <string name="by_playlist" formatted="false">By playlist</string>
+    <string name="calculating" formatted="false">Calculating…</string>
+    <string name="cancel" formatted="false">Cancel</string>
+    <string name="characters_android_does_not_allow_in_filenames_are_removed_or_replaced" formatted="false">Characters Android does not allow in filenames are removed or replaced automatically.</string>
+    <string name="choose_codecs_that_play_on_most_android_media_players" formatted="false">Choose codecs that play on most Android media players</string>
+    <string name="clear" formatted="false">Clear</string>
+    <string name="clear_all" formatted="false">Clear all</string>
+    <string name="clear_all_app_data" formatted="false">Clear all app data</string>
+    <string name="clear_all_history" formatted="false">Clear all history</string>
+    <string name="clear_all_history_cf155c" formatted="false">Clear all history?</string>
+    <string name="clear_diagnostic_log" formatted="false">Clear diagnostic log</string>
+    <string name="clear_download_history" formatted="false">Clear download history</string>
+    <string name="clear_everything" formatted="false">Clear everything</string>
+    <string name="clear_recent_urls" formatted="false">Clear recent URLs</string>
+    <string name="clear_search" formatted="false">Clear search</string>
+    <string name="clear_search_history" formatted="false">Clear search history</string>
+    <string name="clear_temporary_files" formatted="false">Clear temporary files</string>
+    <string name="clear_temporary_files_9fffa1" formatted="false">Clear temporary files?</string>
+    <string name="clear_url" formatted="false">Clear URL</string>
+    <string name="clearing_history_never_deletes_your_downloaded_media" formatted="false">Clearing history never deletes your downloaded media.</string>
+    <string name="clearing_temporary_files_never_deletes_your_completed_downloads" formatted="false">Clearing temporary files never deletes your completed downloads.</string>
+    <string name="compact_download_list_mode" formatted="false">Compact download-list mode</string>
+    <string name="confirm_before_using_mobile_data" formatted="false">Confirm before using mobile data</string>
+    <string name="connection_succeeded" formatted="false">Connection succeeded</string>
+    <string name="connectivity" formatted="false">Connectivity</string>
+    <string name="conversion" formatted="false">Conversion</string>
+    <string name="conversion_can_increase_processing_time_heat_battery_use_and_temporary" formatted="false">Conversion can increase processing time, heat, battery use, and temporary storage.</string>
+    <string name="conversion_hardware_logging" formatted="false">Conversion, hardware, logging</string>
+    <string name="could_not_open_media" formatted="false">Could not open media</string>
+    <string name="could_not_read_the_file" formatted="false">Could not read the file</string>
+    <string name="couldn_t_fetch_this_link" formatted="false">Couldn\'t fetch this link</string>
+    <string name="couldn_t_open_this_file" formatted="false">Couldn\'t open this file</string>
+    <string name="dark" formatted="false">Dark</string>
+    <string name="default_audio_quality" formatted="false">Default audio quality</string>
+    <string name="default_download_folder" formatted="false">Default download folder</string>
+    <string name="default_video_quality" formatted="false">Default video quality</string>
+    <string name="delete" formatted="false">Delete</string>
+    <string name="delete_download" formatted="false">Delete download?</string>
+    <string name="delete_source_files_after_successful_conversion" formatted="false">Delete source files after successful conversion</string>
+    <string name="delete_the_stored_diagnostic_log" formatted="false">Delete the stored diagnostic log.</string>
+    <string name="detailed" formatted="false">Detailed</string>
+    <string name="diagnostic_exports_exclude_credentials_private_urls_folder_contents_an" formatted="false">Diagnostic exports exclude credentials, private URLs, folder contents, and personal information.</string>
+    <string name="diagnostic_logging" formatted="false">Diagnostic logging</string>
+    <string name="diagnostics" formatted="false">Diagnostics</string>
+    <string name="diagnostics_exported" formatted="false">Diagnostics exported</string>
+    <string name="disabled" formatted="false">Disabled</string>
+    <string name="dismiss" formatted="false">Dismiss</string>
+    <string name="do_nothing" formatted="false">Do nothing</string>
+    <string name="don_t_organize" formatted="false">Don\'t organize</string>
+    <string name="done" formatted="false">Done</string>
+    <string name="download_again" formatted="false">Download again</string>
+    <string name="download_behavior" formatted="false">Download behavior</string>
+    <string name="download_complete" formatted="false">Download complete</string>
+    <string name="download_engine" formatted="false">Download engine</string>
+    <string name="download_failed" formatted="false">Download failed</string>
+    <string name="download_folder_access" formatted="false">Download-folder access</string>
+    <string name="download_list" formatted="false">Download list</string>
+    <string name="download_preferences" formatted="false">Download preferences</string>
+    <string name="download_started" formatted="false">Download started</string>
+    <string name="download_subtitles_when_available" formatted="false">Download subtitles when available</string>
+    <string name="download_thumbnail_when_available" formatted="false">Download thumbnail when available</string>
+    <string name="download_type" formatted="false">Download type</string>
+    <string name="downloading" formatted="false">Downloading</string>
+    <string name="downloads" formatted="false">Downloads</string>
+    <string name="downloads_start_immediately" formatted="false">Downloads start immediately</string>
+    <string name="duplicate_detection_method" formatted="false">Duplicate detection method</string>
+    <string name="dynamic_color" formatted="false">Dynamic color</string>
+    <string name="earlier" formatted="false">Earlier</string>
+    <string name="earlier_this_week" formatted="false">Earlier this week</string>
+    <string name="embed_subtitles_in_supported_video" formatted="false">Embed subtitles in supported video</string>
+    <string name="embed_thumbnail_in_audio_files" formatted="false">Embed thumbnail in audio files</string>
+    <string name="embed_title_artist_album_and_more" formatted="false">Embed title, artist, album &amp; more</string>
+    <string name="enable_post_download_conversion" formatted="false">Enable post-download conversion</string>
+    <string name="enter_a_valid_host_or_ip" formatted="false">Enter a valid host or IP</string>
+    <string name="enter_a_value_of_1_or_more" formatted="false">Enter a value of 1 or more</string>
+    <string name="errors_only" formatted="false">Errors only</string>
+    <string name="existing_filename" formatted="false">Existing filename</string>
+    <string name="export_diagnostic_log" formatted="false">Export diagnostic log</string>
+    <string name="export_failed" formatted="false">Export failed</string>
+    <string name="export_settings_to_a_file" formatted="false">Export settings to a file</string>
+    <string name="exported_files_never_contain_passwords_tokens_or_other_credentials" formatted="false">Exported files never contain passwords, tokens, or other credentials.</string>
+    <string name="failed" formatted="false">Failed</string>
+    <string name="fallback_language" formatted="false">Fallback language</string>
+    <string name="faster_processing" formatted="false">Faster processing</string>
+    <string name="fetching" formatted="false">Fetching…</string>
+    <string name="file_names" formatted="false">File names</string>
+    <string name="filename_template" formatted="false">Filename template</string>
+    <string name="folders" formatted="false">Folders</string>
+    <string name="folders_filenames_temporary_files" formatted="false">Folders, filenames, temporary files</string>
+    <string name="follow_system" formatted="false">Follow system</string>
+    <string name="forever" formatted="false">Forever</string>
+    <string name="frame_rate_preference" formatted="false">Frame-rate preference</string>
+    <string name="get_formats" formatted="false">Get formats</string>
+    <string name="granted" formatted="false">Granted</string>
+    <string name="group_multiple_notifications" formatted="false">Group multiple notifications</string>
+    <string name="help_faq" formatted="false">Help / FAQ</string>
+    <string name="high_contrast_mode" formatted="false">High-contrast mode</string>
+    <string name="history" formatted="false">History</string>
+    <string name="history_and_privacy" formatted="false">History &amp; privacy</string>
+    <string name="history_retention" formatted="false">History retention</string>
+    <string name="home" formatted="false">Home</string>
+    <string name="host" formatted="false">Host</string>
+    <string name="if_a_network_setting_blocks_a_download_the_app_explains_which_one_and" formatted="false">If a network setting blocks a download, the app explains which one and offers to open the relevant settings.</string>
+    <string name="import_settings_from_a_file" formatted="false">Import settings from a file</string>
+    <string name="include_all_available_languages" formatted="false">Include all available languages</string>
+    <string name="kdownloader" formatted="false">KDownloader</string>
+    <string name="keep_download_history" formatted="false">Keep download history</string>
+    <string name="keep_the_screen_awake_during_downloads" formatted="false">Keep the screen awake during downloads</string>
+    <string name="language" formatted="false">Language</string>
+    <string name="language_and_theme_changes_are_applied_right_away_and_keep_your_place" formatted="false">Language and theme changes are applied right away and keep your place in the app.</string>
+    <string name="languages_type_format_embedding" formatted="false">Languages, type, format, embedding</string>
+    <string name="legal" formatted="false">Legal</string>
+    <string name="light" formatted="false">Light</string>
+    <string name="limit_download_speed" formatted="false">Limit download speed</string>
+    <string name="limits_and_scheduling" formatted="false">Limits &amp; scheduling</string>
+    <string name="link_on_clipboard" formatted="false">Link on clipboard</string>
+    <string name="link_or_a_site_that_isn_t_supported" formatted="false">link, or a site that isn\'t supported.</string>
+    <string name="long_downloads_run_in_a_foreground_service_with_an_ongoing_notificatio" formatted="false">Long downloads run in a foreground service with an ongoing notification, as required by Android.</string>
+    <string name="lower_battery_usage" formatted="false">Lower battery usage</string>
+    <string name="m4a" formatted="false">M4A</string>
+    <string name="manage" formatted="false">Manage</string>
+    <string name="manual_captions_only" formatted="false">Manual captions only</string>
+    <string name="maximum_filename_length" formatted="false">Maximum filename length</string>
+    <string name="maximum_retries_for_failed_downloads" formatted="false">Maximum retries for failed downloads</string>
+    <string name="maximum_simultaneous_downloads" formatted="false">Maximum simultaneous downloads</string>
+    <string name="maximum_temporary_storage_mb" formatted="false">Maximum temporary-storage (MB)</string>
+    <string name="media_access_when_needed" formatted="false">Media access (when needed)</string>
+    <string name="media_id" formatted="false">Media ID</string>
+    <string name="metadata" formatted="false">Metadata</string>
+    <string name="mobile_data_warning_threshold_mb" formatted="false">Mobile-data warning threshold (MB)</string>
+    <string name="more_options" formatted="false">More options</string>
+    <string name="motion" formatted="false">Motion</string>
+    <string name="mp3" formatted="false">MP3</string>
+    <string name="mp3_audio_only" formatted="false">MP3 · audio only</string>
+    <string name="mp4" formatted="false">MP4</string>
+    <string name="mp4_video_audio" formatted="false">MP4 · video + audio</string>
+    <string name="network" formatted="false">Network</string>
+    <string name="no_active_downloads" formatted="false">No active downloads.</string>
+    <string name="no_app_available_to_share_this_file" formatted="false">No app available to share this file</string>
+    <string name="no_app_can_handle_this_action" formatted="false">No app can handle this action</string>
+    <string name="no_downloads_match_your_search" formatted="false">No downloads match your search.</string>
+    <string name="no_downloads_yet" formatted="false">No downloads yet</string>
+    <string name="no_saved_file_is_linked_to_this_entry_only_the_history_record_will_be" formatted="false">No saved file is linked to this entry; only the history record will be removed.</string>
+    <string name="none" formatted="false">None</string>
+    <string name="not_granted" formatted="false">Not granted</string>
+    <string name="not_set" formatted="false">Not set</string>
+    <string name="not_set_tap_to_choose" formatted="false">Not set — tap to choose</string>
+    <string name="nothing_here_yet" formatted="false">Nothing here yet</string>
+    <string name="notification_sound" formatted="false">Notification sound</string>
+    <string name="notifications" formatted="false">Notifications</string>
+    <string name="notifications_are_turned_off_for_this_app_so_progress_and_completion_a" formatted="false">Notifications are turned off for this app, so progress and completion alerts won\'t appear.</string>
+    <string name="notifications_battery_background" formatted="false">Notifications, battery, background</string>
+    <string name="notify_when_a_download_completes" formatted="false">Notify when a download completes</string>
+    <string name="notify_when_a_download_fails" formatted="false">Notify when a download fails</string>
+    <string name="notify_when_all_downloads_complete" formatted="false">Notify when all downloads complete</string>
+    <string name="off" formatted="false">Off</string>
+    <string name="ok" formatted="false">OK</string>
+    <string name="on" formatted="false">On</string>
+    <string name="on_filename_conflict" formatted="false">On filename conflict</string>
+    <string name="only_download_within_a_time_window" formatted="false">Only download within a time window</string>
+    <string name="open" formatted="false">Open</string>
+    <string name="open_android_notification_settings" formatted="false">Open Android notification settings</string>
+    <string name="open_settings" formatted="false">Open settings</string>
+    <string name="open_source_licenses" formatted="false">Open-source licenses</string>
+    <string name="open_the_downloads_screen" formatted="false">Open the downloads screen</string>
+    <string name="open_the_file" formatted="false">Open the file</string>
+    <string name="open_with" formatted="false">Open with</string>
+    <string name="opus" formatted="false">Opus</string>
+    <string name="organize_into_subfolders" formatted="false">Organize into subfolders</string>
+    <string name="original_audio" formatted="false">Original audio</string>
+    <string name="password_optional" formatted="false">Password (optional)</string>
+    <string name="paste_from_clipboard" formatted="false">Paste from clipboard</string>
+    <string name="pause_when_battery_saver_is_on" formatted="false">Pause when battery saver is on</string>
+    <string name="pause_when_the_device_is_too_hot" formatted="false">Pause when the device is too hot</string>
+    <string name="pause_when_the_network_changes" formatted="false">Pause when the network changes</string>
+    <string name="permissions_and_status" formatted="false">Permissions &amp; status</string>
+    <string name="play" formatted="false">Play</string>
+    <string name="port" formatted="false">Port</string>
+    <string name="port_must_be_1_65535" formatted="false">Port must be 1-65535</string>
+    <string name="power_and_thermal" formatted="false">Power &amp; thermal</string>
+    <string name="prefer_30_fps" formatted="false">Prefer 30 FPS</string>
+    <string name="prefer_60_fps" formatted="false">Prefer 60 FPS</string>
+    <string name="prefer_android_compatible_codecs" formatted="false">Prefer Android-compatible codecs</string>
+    <string name="prefer_hardware_acceleration_when_supported" formatted="false">Prefer hardware acceleration when supported</string>
+    <string name="prefer_hdr_when_available" formatted="false">Prefer HDR when available</string>
+    <string name="prefer_manual_fall_back_to_generated" formatted="false">Prefer manual, fall back to generated</string>
+    <string name="preferred_language" formatted="false">Preferred language</string>
+    <string name="preparing" formatted="false">Preparing…</string>
+    <string name="preserve_source_files_when_conversion_fails" formatted="false">Preserve source files when conversion fails</string>
+    <string name="preserve_source_upload_date" formatted="false">Preserve source upload date</string>
+    <string name="prevent_duplicate_downloads" formatted="false">Prevent duplicate downloads</string>
+    <string name="privacy_policy" formatted="false">Privacy policy</string>
+    <string name="processing_priority" formatted="false">Processing priority</string>
+    <string name="progress_completion_actions" formatted="false">Progress, completion, actions</string>
+    <string name="proxy" formatted="false">Proxy</string>
+    <string name="proxy_passwords_are_stored_using_android_keystore_backed_encryption_an" formatted="false">Proxy passwords are stored using Android Keystore-backed encryption and are never shown or exported.</string>
+    <string name="quality" formatted="false">Quality</string>
+    <string name="queue" formatted="false">Queue</string>
+    <string name="queue_retries_power_scheduling" formatted="false">Queue, retries, power, scheduling</string>
+    <string name="re_check_status" formatted="false">Re-check status</string>
+    <string name="ready_when_you_are" formatted="false">Ready when you are</string>
+    <string name="recent_links" formatted="false">Recent links</string>
+    <string name="reduce_animations" formatted="false">Reduce animations</string>
+    <string name="remove_all_history_entries_downloaded_files_are_kept" formatted="false">Remove all history entries. Downloaded files are kept.</string>
+    <string name="remove_the_list_of_recently_used_urls" formatted="false">Remove the list of recently used URLs.</string>
+    <string name="remove_your_saved_searches" formatted="false">Remove your saved searches.</string>
+    <string name="replace_after_confirmation" formatted="false">Replace after confirmation</string>
+    <string name="report_a_problem" formatted="false">Report a problem</string>
+    <string name="requires_android_12_or_newer" formatted="false">Requires Android 12 or newer</string>
+    <string name="reset" formatted="false">Reset</string>
+    <string name="reset_all" formatted="false">Reset all</string>
+    <string name="reset_all_settings" formatted="false">Reset all settings</string>
+    <string name="reset_appearance_preferences" formatted="false">Reset appearance preferences</string>
+    <string name="reset_download_preferences" formatted="false">Reset download preferences</string>
+    <string name="reset_network_preferences" formatted="false">Reset network preferences</string>
+    <string name="resets_every_setting_clears_history_recent_urls_searches_and_caches_yo" formatted="false">Resets every setting, clears history, recent URLs, searches, and caches. Your downloaded media files are NOT deleted.</string>
+    <string name="resetting_settings_never_deletes_downloaded_files_or_history" formatted="false">Resetting settings never deletes downloaded files or history.</string>
+    <string name="restore_settings_to_defaults" formatted="false">Restore settings to defaults</string>
+    <string name="restores_download_type_format_quality_and_metadata_options_to_their_de" formatted="false">Restores download type, format, quality, and metadata options to their defaults.</string>
+    <string name="restores_every_setting_to_its_default_downloaded_files_and_history_are" formatted="false">Restores every setting to its default. Downloaded files and history are NOT deleted.</string>
+    <string name="restores_network_and_proxy_settings_to_their_defaults_and_clears_the_s" formatted="false">Restores network and proxy settings to their defaults and clears the saved proxy password.</string>
+    <string name="restores_theme_language_list_and_motion_options_to_their_defaults" formatted="false">Restores theme, language, list, and motion options to their defaults.</string>
+    <string name="restricted" formatted="false">Restricted</string>
+    <string name="resume_and_duplicates" formatted="false">Resume &amp; duplicates</string>
+    <string name="resume_queued_downloads_after_restart" formatted="false">Resume queued downloads after restart</string>
+    <string name="retention_clearing_export_import" formatted="false">Retention, clearing, export/import</string>
+    <string name="retry_automatically_after_connection_loss" formatted="false">Retry automatically after connection loss</string>
+    <string name="save" formatted="false">Save</string>
+    <string name="save_recently_used_urls" formatted="false">Save recently used URLs</string>
+    <string name="save_search_history" formatted="false">Save search history</string>
+    <string name="save_video_and_audio_from_any_link" formatted="false">Save video &amp; audio from any link</string>
+    <string name="saved_to_download_kdownloader" formatted="false">Saved to Download/KDownloader</string>
+    <string name="search_downloads" formatted="false">Search downloads</string>
+    <string name="settings" formatted="false">Settings</string>
+    <string name="settings_exported" formatted="false">Settings exported</string>
+    <string name="share" formatted="false">Share</string>
+    <string name="share_the_file" formatted="false">Share the file</string>
+    <string name="show_a_quality_selection_dialog_every_time" formatted="false">Show a quality-selection dialog every time</string>
+    <string name="show_download_progress_notifications" formatted="false">Show download progress notifications</string>
+    <string name="show_download_speed" formatted="false">Show download speed</string>
+    <string name="show_estimated_time_remaining" formatted="false">Show estimated time remaining</string>
+    <string name="show_file_size_estimates" formatted="false">Show file size estimates</string>
+    <string name="show_pause_resume_cancel_actions" formatted="false">Show Pause / Resume / Cancel actions</string>
+    <string name="skip_the_download" formatted="false">Skip the download</string>
+    <string name="socks" formatted="false">SOCKS</string>
+    <string name="sort_newest_first" formatted="false">Sort newest first</string>
+    <string name="sort_oldest_first" formatted="false">Sort oldest first</string>
+    <string name="source_code" formatted="false">Source code</string>
+    <string name="source_url" formatted="false">Source URL</string>
+    <string name="speed_limit_kb_s" formatted="false">Speed limit (KB/s)</string>
+    <string name="srt" formatted="false">SRT</string>
+    <string name="storage_and_files" formatted="false">Storage &amp; files</string>
+    <string name="stored_securely" formatted="false">•••••• (stored securely)</string>
+    <string name="style" formatted="false">Style</string>
+    <string name="subtitle_format" formatted="false">Subtitle format</string>
+    <string name="subtitle_type" formatted="false">Subtitle type</string>
+    <string name="subtitles_and_captions" formatted="false">Subtitles &amp; captions</string>
+    <string name="support" formatted="false">Support</string>
+    <string name="switch_to_dark_theme" formatted="false">Switch to dark theme</string>
+    <string name="switch_to_light_theme" formatted="false">Switch to light theme</string>
+    <string name="temporary_files" formatted="false">Temporary files</string>
+    <string name="temporary_files_folder_optional" formatted="false">Temporary files folder (optional)</string>
+    <string name="terms_of_service" formatted="false">Terms of service</string>
+    <string name="test_connection" formatted="false">Test connection</string>
+    <string name="testing" formatted="false">Testing…</string>
+    <string name="text" formatted="false">•</string>
+    <string name="text_size_follows_your_android_system_accessibility_settings" formatted="false">Text size follows your Android system accessibility settings.</string>
+    <string name="the_parallel_limit_applies_to_newly_started_downloads_downloads_alread" formatted="false">The parallel limit applies to newly started downloads; downloads already running are not interrupted.</string>
+    <string name="theme" formatted="false">Theme</string>
+    <string name="theme_language_list_motion" formatted="false">Theme, language, list, motion</string>
+    <string name="this_app_can_continue_downloads_reliably_in_the_background" formatted="false">This app can continue downloads reliably in the background.</string>
+    <string name="this_download_has_no_saved_file" formatted="false">This download has no saved file</string>
+    <string name="this_removes_intermediate_and_cache_files_only_completed_downloads_are" formatted="false">This removes intermediate and cache files only. Completed downloads are kept.</string>
+    <string name="this_removes_the_entry_from_your_history" formatted="false">This removes the entry from your history.</string>
+    <string name="today" formatted="false">Today</string>
+    <string name="top_of_queue" formatted="false">Top of queue</string>
+    <string name="treat_metered_wi_fi_as_mobile_data" formatted="false">Treat metered Wi-Fi as mobile data</string>
+    <string name="try_again" formatted="false">Try again</string>
+    <string name="type_and_format" formatted="false">Type &amp; format</string>
+    <string name="type_format_quality_metadata" formatted="false">Type, format, quality, metadata</string>
+    <string name="until_app_closes" formatted="false">Until app closes</string>
+    <string name="updates_are_delivered_through_your_app_store_there_is_no_in_app_update" formatted="false">Updates are delivered through your app store; there is no in-app updater.</string>
+    <string name="use" formatted="false">Use</string>
+    <string name="use_24_hour_hh_mm" formatted="false">Use 24-hour HH:MM</string>
+    <string name="use_colors_from_your_wallpaper" formatted="false">Use colors from your wallpaper</string>
+    <string name="use_the_closest_available_quality_or_format_when_the_requested_one_is" formatted="false">Use the closest available quality or format when the requested one is missing</string>
+    <string name="username_optional" formatted="false">Username (optional)</string>
+    <string name="value_1_download_in_progress" formatted="false">1 download in progress</string>
+    <string name="value_128_kbps" formatted="false">128 kbps</string>
+    <string name="value_192_kbps" formatted="false">192 kbps</string>
+    <string name="value_256_kbps" formatted="false">256 kbps</string>
+    <string name="value_30_days" formatted="false">30 days</string>
+    <string name="value_320_kbps" formatted="false">320 kbps</string>
+    <string name="value_7_days" formatted="false">7 days</string>
+    <string name="value_96_kbps" formatted="false">96 kbps</string>
+    <string name="version_licenses_help" formatted="false">Version, licenses, help</string>
+    <string name="vibration" formatted="false">Vibration</string>
+    <string name="video" formatted="false">Video</string>
+    <string name="video_folder_optional" formatted="false">Video folder (optional)</string>
+    <string name="video_format" formatted="false">Video format</string>
+    <string name="video_or_audio_url" formatted="false">Video or audio URL</string>
+    <string name="view" formatted="false">View</string>
+    <string name="vtt" formatted="false">VTT</string>
+    <string name="warn_before_download_if_space_is_low" formatted="false">Warn before download if space is low</string>
+    <string name="webm" formatted="false">WebM</string>
+    <string name="when_a_download_finishes" formatted="false">When a download finishes</string>
+    <string name="when_a_format_or_quality_is_unavailable_the_app_explains_the_fallback" formatted="false">When a format or quality is unavailable, the app explains the fallback it used instead of failing silently.</string>
+    <string name="when_supported_by_the_source" formatted="false">When supported by the source</string>
+    <string name="when_thermal_status_is_available" formatted="false">When thermal status is available</string>
+    <string name="wi_fi_and_mobile_data" formatted="false">Wi-Fi and mobile data</string>
+    <string name="wi_fi_only" formatted="false">Wi-Fi only</string>
+    <string name="window_end_hh_mm" formatted="false">Window end (HH:MM)</string>
+    <string name="window_start_hh_mm" formatted="false">Window start (HH:MM)</string>
+    <string name="working" formatted="false">Working…</string>
+    <string name="yesterday" formatted="false">Yesterday</string>
+    <string name="you_ll_confirm_each_download" formatted="false">You\'ll confirm each download</string>
+    <string name="download" formatted="false">Download</string>
+    <string name="sort" formatted="false">Sort</string>
+    <string name="thumbnail" formatted="false">Thumbnail</string>
+    <string name="something_went_wrong" formatted="false">Something went wrong</string>
+    <string name="filter_all" formatted="false">All</string>
+    <string name="filter_video" formatted="false">Video</string>
+    <string name="filter_audio" formatted="false">Audio</string>
 </resources>
