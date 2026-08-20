@@ -23,7 +23,7 @@ public final class FormatSelector {
 
     public static List<DownloadChoice> choices(List<FormatInput> formats, String sourceUrl) {
         if (usesSingleVideoQuality(sourceUrl)) {
-            return singleQualityChoices(formats, ExtractorOptions.isTikTokUrl(sourceUrl));
+            return singleQualityChoices(formats, false);
         }
         Set<Integer> heights = new HashSet<>();
         for (FormatInput format : formats) if (hasVideo(format) && format.getHeight() != null) heights.add(format.getHeight());

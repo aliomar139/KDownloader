@@ -2,8 +2,6 @@ package com.kira.kdownloader.engine;
 
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.assertEquals;
 
 public class ExtractorOptionsTest {
@@ -22,8 +20,10 @@ public class ExtractorOptionsTest {
         assertEquals(false, ExtractorOptions.isYouTubeUrl("https://youtube.com.example.test/watch?v=1"));
     }
 
-    @Test public void buildsMobileApiAppInfoFromPersistedInstallIds() {
-        assertEquals("tiktok:app_info=7300000000000000001,7300000000000000002",
-                ExtractorOptions.tikTokAppInfo(Arrays.asList("7300000000000000001", "7300000000000000002")));
+    @Test public void recognizesInstagramAndFacebookWithoutTrustingLookalikes() {
+        assertEquals(true, ExtractorOptions.isInstagramUrl("https://www.instagram.com/reel/1"));
+        assertEquals(true, ExtractorOptions.isFacebookUrl("https://fb.watch/example"));
+        assertEquals(false, ExtractorOptions.isInstagramUrl("https://instagram.com.example.test/reel/1"));
+        assertEquals(false, ExtractorOptions.isFacebookUrl("https://facebook.com.example.test/reel/1"));
     }
 }

@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,6 +29,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -41,6 +44,7 @@ import com.kira.kdownloader.engine.MediaInfo;
 import com.kira.kdownloader.service.DownloadEvents;
 import com.kira.kdownloader.service.DownloadService;
 import com.kira.kdownloader.util.FormattingKt;
+import com.kira.kdownloader.util.MotionPreferences;
 import com.kira.kdownloader.util.RecentUrls;
 import com.kira.kdownloader.util.UrlExtractor;
 
@@ -67,10 +71,11 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
     private TextInputEditText urlInput;
     private MaterialButton fetchButton;
     private MaterialButton activeDownloadsButton;
+    private View urlCard;
     private View clipboardBanner;
     private TextView clipboardText;
-    private View idleState, loadingState, errorState, resultState;
-    private TextView errorMessage;
+    private View idleState, loadingState, resultState;
+    private StateView errorState;
     private LinearLayout recentUrls;
     private ImageView thumbnail;
     private TextView mediaTitle, mediaMeta;
@@ -78,6 +83,7 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
     private ObjectAnimator shimmer;
     private BottomSheetDialog downloadsDialog;
     private ActiveDownloadAdapter activeDownloadAdapter;
+    private boolean showingResult;
 
     public static HomeFragment newInstance(String initialUrl) {
         HomeFragment fragment = new HomeFragment();
@@ -106,13 +112,13 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         urlInput = view.findViewById(R.id.url_input);
         fetchButton = view.findViewById(R.id.fetch_button);
         activeDownloadsButton = view.findViewById(R.id.active_downloads_button);
+        urlCard = view.findViewById(R.id.url_card);
         clipboardBanner = view.findViewById(R.id.clipboard_banner);
         clipboardText = view.findViewById(R.id.clipboard_text);
         idleState = view.findViewById(R.id.idle_state);
         loadingState = view.findViewById(R.id.loading_state);
         errorState = view.findViewById(R.id.error_state);
         resultState = view.findViewById(R.id.result_state);
-        errorMessage = view.findViewById(R.id.error_message);
         recentUrls = view.findViewById(R.id.recent_urls);
         thumbnail = view.findViewById(R.id.media_thumbnail);
         mediaTitle = view.findViewById(R.id.media_title);
@@ -131,7 +137,14 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         });
         view.findViewById(R.id.paste_button).setOnClickListener(ignored -> pasteClipboard(false));
         view.findViewById(R.id.clear_button).setOnClickListener(ignored -> urlInput.setText(""));
-        view.findViewById(R.id.retry_button).setOnClickListener(ignored -> fetch());
+        view.findViewById(R.id.change_link_button).setOnClickListener(ignored -> {
+            viewModel.reset();
+            urlInput.requestFocus();
+        });
+        StateView idlePrompt = view.findViewById(R.id.home_idle_prompt);
+        idlePrompt.setState(R.drawable.ic_link, getString(R.string.ready_when_you_are), null);
+        errorState.setState(R.drawable.ic_error_outline, getString(R.string.something_went_wrong), null);
+        errorState.setAction(getString(R.string.try_again), ignored -> fetch());
         view.findViewById(R.id.use_clipboard_button).setOnClickListener(ignored -> pasteClipboard(true));
         view.findViewById(R.id.dismiss_clipboard_button).setOnClickListener(ignored -> {
             dismissedLink = clipboardSuggestion;
@@ -177,6 +190,9 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
 
     private void renderState(HomeUiState state) {
         if (root == null || state == null) return;
+        showingResult = state instanceof HomeUiState.Loaded;
+        urlCard.setVisibility(showingResult ? View.GONE : View.VISIBLE);
+        if (showingResult) clipboardBanner.setVisibility(View.GONE);
         idleState.setVisibility(state instanceof HomeUiState.Idle ? View.VISIBLE : View.GONE);
         loadingState.setVisibility(state instanceof HomeUiState.Loading ? View.VISIBLE : View.GONE);
         errorState.setVisibility(state instanceof HomeUiState.Error ? View.VISIBLE : View.GONE);
@@ -184,8 +200,10 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         fetchButton.setEnabled(!(state instanceof HomeUiState.Loading));
         if (state instanceof HomeUiState.Loading) startShimmer();
         else if (shimmer != null) shimmer.cancel();
+        if (!(state instanceof HomeUiState.Loaded)) loadedState = null;
         if (state instanceof HomeUiState.Error) {
-            errorMessage.setText(((HomeUiState.Error) state).getMessage());
+            errorState.setState(R.drawable.ic_error_outline, getString(R.string.something_went_wrong),
+                    ((HomeUiState.Error) state).getMessage());
         } else if (state instanceof HomeUiState.Loaded) {
             loadedState = (HomeUiState.Loaded) state;
             renderLoaded(loadedState);
@@ -202,9 +220,14 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         String duration = FormattingKt.formatDuration(info.getDurationSeconds());
         if (!duration.isEmpty()) metadata.add(duration);
         mediaMeta.setText(android.text.TextUtils.join(" · ", metadata));
-        if (info.getThumbnailUrl() == null) thumbnail.setImageResource(R.drawable.ic_smart_display);
-        else Glide.with(this).load(info.getThumbnailUrl()).placeholder(R.drawable.ic_smart_display)
-                .error(R.drawable.ic_smart_display).into(thumbnail);
+        if (info.getThumbnailUrl() == null) thumbnail.setImageResource(R.drawable.placeholder_video);
+        else {
+            RequestBuilder<Drawable> request = Glide.with(this).load(info.getThumbnailUrl());
+            if (!MotionPreferences.reduce(requireContext())) {
+                request = request.transition(DrawableTransitionOptions.withCrossFade(200));
+            }
+            request.placeholder(R.drawable.placeholder_video).error(R.drawable.placeholder_video).into(thumbnail);
+        }
         formatAdapter.submit(loaded.getSourceUrl(), info.getChoices(), downloadStates);
     }
 
@@ -282,8 +305,14 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
     }
 
     private void openMedia(String fileUri, String kind) {
-        Intent intent = new Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse(fileUri),
-                "AUDIO".equals(kind) ? "audio/*" : "video/*");
+        Uri uri = Uri.parse(fileUri);
+        String mimeType = requireContext().getContentResolver().getType(uri);
+        if (mimeType == null || mimeType.trim().isEmpty()) {
+            mimeType = "AUDIO".equals(kind) ? "audio/*" : "video/*";
+        }
+        Intent intent = new Intent(Intent.ACTION_VIEW)
+                .setDataAndType(uri, mimeType)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         try { startActivity(Intent.createChooser(intent, "Open with")); }
         catch (Throwable error) {
             Log.w(TAG, "Could not open media", error);
@@ -295,14 +324,13 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         if (recentUrls == null) return;
         recentUrls.removeAllViews();
         for (String url : RecentUrls.all(requireContext())) {
-            MaterialButton button = new MaterialButton(requireContext(), null,
-                    com.google.android.material.R.attr.materialButtonOutlinedStyle);
+            MaterialButton button = (MaterialButton) getLayoutInflater().inflate(
+                    R.layout.view_recent_url, recentUrls, false);
             button.setText(url);
             button.setMaxLines(1);
             button.setEllipsize(android.text.TextUtils.TruncateAt.END);
             button.setOnClickListener(ignored -> { urlInput.setText(url); fetch(); });
-            recentUrls.addView(button, new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            recentUrls.addView(button);
         }
     }
 
@@ -314,10 +342,10 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
         String candidate = value == null ? null : UrlExtractor.fromText(value);
         clipboardSuggestion = candidate != null && candidate.regionMatches(true, 0, "http", 0, 4)
                 ? candidate : null;
-        boolean show = clipboardSuggestion != null && !clipboardSuggestion.equals(text(urlInput))
+        boolean show = !showingResult && clipboardSuggestion != null && !clipboardSuggestion.equals(text(urlInput))
                 && !clipboardSuggestion.equals(dismissedLink);
         clipboardBanner.setVisibility(show ? View.VISIBLE : View.GONE);
-        if (show) clipboardText.setText("Link on clipboard\n" + clipboardSuggestion);
+        if (show) clipboardText.setText("Link on clipboard · " + clipboardSuggestion);
     }
 
     private void pasteClipboard(boolean fetchNow) {
@@ -333,8 +361,12 @@ public final class HomeFragment extends Fragment implements FormatAdapter.Listen
 
     private void startShimmer() {
         if (shimmer != null) shimmer.cancel();
-        shimmer = ObjectAnimator.ofFloat(root.findViewById(R.id.skeleton_1), View.ALPHA, 0.45f, 1f);
-        shimmer.setDuration(850L);
+        if (MotionPreferences.reduce(requireContext())) {
+            root.findViewById(R.id.skeleton_1).setAlpha(0.75f);
+            return;
+        }
+        shimmer = ObjectAnimator.ofFloat(root.findViewById(R.id.skeleton_1), View.ALPHA, 0.35f, 0.75f);
+        shimmer.setDuration(1100L);
         shimmer.setRepeatMode(ObjectAnimator.REVERSE);
         shimmer.setRepeatCount(ObjectAnimator.INFINITE);
         shimmer.start();

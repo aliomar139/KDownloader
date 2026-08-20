@@ -70,7 +70,8 @@ final class FormatAdapter extends RecyclerView.Adapter<FormatAdapter.Holder> {
         boolean audio = choice.getKind() == FormatSelector.Kind.AUDIO;
 
         holder.icon.setImageResource(audio ? R.drawable.ic_music_note : R.drawable.ic_videocam);
-        holder.title.setText(choice.getLabel() + (choice.equals(recommended) ? "  Best" : ""));
+        holder.title.setText(choice.getLabel());
+        holder.badge.setVisibility(choice.equals(recommended) ? View.VISIBLE : View.GONE);
         String base = audio ? "MP3 · audio only" : "MP4 · video + audio";
         String size = FormattingKt.formatBytes(choice.getApproxBytes());
         holder.summary.setText(size.isEmpty() ? base : base + " · ~" + size);
@@ -99,6 +100,7 @@ final class FormatAdapter extends RecyclerView.Adapter<FormatAdapter.Holder> {
     static final class Holder extends RecyclerView.ViewHolder {
         private final ImageView icon;
         private final TextView title;
+        private final TextView badge;
         private final TextView summary;
         private final TextView status;
         private final ImageButton action;
@@ -108,6 +110,7 @@ final class FormatAdapter extends RecyclerView.Adapter<FormatAdapter.Holder> {
             super(itemView);
             icon = itemView.findViewById(R.id.format_icon);
             title = itemView.findViewById(R.id.format_title);
+            badge = itemView.findViewById(R.id.format_badge);
             summary = itemView.findViewById(R.id.format_summary);
             status = itemView.findViewById(R.id.format_status);
             action = itemView.findViewById(R.id.format_action);

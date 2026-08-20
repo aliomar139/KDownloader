@@ -10,7 +10,7 @@ import java.util.List;
 public final class RecentUrls {
     private static final String PREFS = "recent_urls";
     private static final String KEY = "urls";
-    private static final int MAX = 8;
+    private static final int MAX = 3;
 
     private RecentUrls() {}
 
@@ -20,6 +20,7 @@ public final class RecentUrls {
         List<String> result = new ArrayList<>();
         for (String value : stored.split("\\n")) {
             if (!value.trim().isEmpty()) result.add(value);
+            if (result.size() == MAX) break;
         }
         return result;
     }

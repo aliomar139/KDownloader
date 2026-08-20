@@ -57,14 +57,14 @@ public class FormatSelectorTest {
         assertEquals(FormatSelector.FALLBACK_VIDEO_SELECTOR, choices.get(0).getFormatSelector());
     }
 
-    @Test public void tiktokUsesASeparateAudioStreamWhenTheBestVideoHasNoAudio() {
+    @Test public void tiktokLetsTheExtractorChooseACompleteVideo() {
         List<DownloadChoice> choices = FormatSelector.choices(Arrays.asList(
                 video("combined", 720), input("video-only", 1080, "none", null, Collections.emptyMap())), "https://vt.tiktok.com/example/");
         assertEquals(Arrays.asList("1080p", "Audio (mp3)"), labels(choices));
-        assertEquals("video-only+bestaudio/best", choices.get(0).getFormatSelector());
+        assertEquals(FormatSelector.FALLBACK_VIDEO_SELECTOR, choices.get(0).getFormatSelector());
     }
 
-    @Test public void tiktokReusesTheBestCombinedDirectFormatInsteadOfExtractingTwice() {
+    @Test public void tiktokDoesNotReuseExpiringDirectUrlsWithoutExtractorCookies() {
         Map<String, String> headers = new HashMap<>();
         headers.put("Referer", "https://www.tiktok.com/");
         List<DownloadChoice> choices = FormatSelector.choices(Arrays.asList(
@@ -72,9 +72,9 @@ public class FormatSelectorTest {
                 input("video-only", 1080, "none", "https://video.example/tiktok-video-only.mp4", Collections.emptyMap())),
                 "https://www.tiktok.com/@example/video/1");
         DownloadChoice video = choices.get(0);
-        assertEquals("720p", video.getLabel());
-        assertEquals("https://video.example/tiktok.mp4", video.getDirectUrl());
-        assertEquals("https://www.tiktok.com/", video.getHttpHeaders().get("Referer"));
+        assertEquals("1080p", video.getLabel());
+        assertEquals(null, video.getDirectUrl());
+        assertEquals(FormatSelector.FALLBACK_VIDEO_SELECTOR, video.getFormatSelector());
     }
 
     @Test public void facebookReelExposesOneBestVideoQualityPlusAudio() {

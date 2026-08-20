@@ -4,6 +4,10 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,8 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.GridLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,6 +39,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.color.MaterialColors;
 import com.google.android.material.textfield.TextInputEditText;
 import com.kira.kdownloader.MainActivity;
 import com.kira.kdownloader.R;
@@ -58,7 +64,8 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
                     result -> scan(true));
     private DownloadDao dao;
     private HistoryAdapter adapter;
-    private TextView countView, emptyView;
+    private TextView countView;
+    private StateView emptyView;
     private RecyclerView listView;
     private TextInputEditText searchView;
     private List<DownloadEntity> all = Collections.emptyList();
@@ -79,6 +86,7 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
     @Override public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         countView = view.findViewById(R.id.history_count);
         emptyView = view.findViewById(R.id.history_empty);
+        emptyView.setState(R.drawable.ic_history_outlined, getString(R.string.no_downloads_yet), null);
         listView = view.findViewById(R.id.history_list);
         searchView = view.findViewById(R.id.history_search);
         adapter = new HistoryAdapter(this);
@@ -93,6 +101,31 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
                 DownloadEntity download = adapter.downloadAt(holder.getBindingAdapterPosition());
                 adapter.notifyItemChanged(holder.getBindingAdapterPosition());
                 if (download != null) confirmDelete(download);
+            }
+            @Override public void onChildDraw(@NonNull Canvas canvas, @NonNull RecyclerView recyclerView,
+                                              @NonNull RecyclerView.ViewHolder holder, float dX, float dY,
+                                              int actionState, boolean isCurrentlyActive) {
+                View item = holder.itemView;
+                Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                paint.setColor(MaterialColors.getColor(item,
+                        com.google.android.material.R.attr.colorErrorContainer));
+                float radius = dp(16);
+                RectF bounds = dX > 0
+                        ? new RectF(item.getLeft(), item.getTop(), item.getLeft() + dX, item.getBottom())
+                        : new RectF(item.getRight() + dX, item.getTop(), item.getRight(), item.getBottom());
+                canvas.drawRoundRect(bounds, radius, radius, paint);
+                Drawable icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_delete);
+                if (icon != null) {
+                    icon = DrawableCompat.wrap(icon.mutate());
+                    DrawableCompat.setTint(icon, MaterialColors.getColor(item,
+                            com.google.android.material.R.attr.colorOnErrorContainer));
+                    int size = dp(24);
+                    int top = item.getTop() + (item.getHeight() - size) / 2;
+                    int left = dX > 0 ? item.getLeft() + dp(16) : item.getRight() - dp(16) - size;
+                    icon.setBounds(left, top, left + size, top + size);
+                    icon.draw(canvas);
+                }
+                super.onChildDraw(canvas, recyclerView, holder, dX, dY, actionState, isCurrentlyActive);
             }
         }).attachToRecyclerView(listView);
 
@@ -150,7 +183,9 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
         adapter.submit(visible);
         listView.setVisibility(visible.isEmpty() ? View.GONE : View.VISIBLE);
         emptyView.setVisibility(visible.isEmpty() ? View.VISIBLE : View.GONE);
-        emptyView.setText(all.isEmpty() ? "No downloads yet" : "No downloads match your search.");
+        emptyView.setState(all.isEmpty() ? R.drawable.ic_history_outlined : R.drawable.ic_search,
+                all.isEmpty() ? getString(R.string.no_downloads_yet)
+                        : getString(R.string.no_downloads_match_your_search), null);
     }
 
     private void showMoreMenu(View anchor) {
@@ -203,8 +238,14 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
             Toast.makeText(requireContext(), R.string.this_download_has_no_saved_file, Toast.LENGTH_SHORT).show();
             return;
         }
-        Intent intent = new Intent(Intent.ACTION_VIEW).setDataAndType(Uri.parse(download.getFileUri()),
-                "AUDIO".equals(download.getKind()) ? "audio/*" : "video/*");
+        Uri uri = Uri.parse(download.getFileUri());
+        String mimeType = requireContext().getContentResolver().getType(uri);
+        if (mimeType == null || mimeType.trim().isEmpty()) {
+            mimeType = "AUDIO".equals(download.getKind()) ? "audio/*" : "video/*";
+        }
+        Intent intent = new Intent(Intent.ACTION_VIEW)
+                .setDataAndType(uri, mimeType)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         try { startActivity(Intent.createChooser(intent, "Open with")); }
         catch (Throwable error) {
             Log.w(TAG, "Could not open " + download.getTitle(), error);
@@ -213,35 +254,37 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
     }
 
     @Override public void onDetails(DownloadEntity download) {
-        LinearLayout actions = new LinearLayout(requireContext());
-        actions.setOrientation(LinearLayout.VERTICAL);
-        int padding = (int) (20 * getResources().getDisplayMetrics().density);
-        actions.setPadding(padding, padding, padding, padding);
-        TextView title = new TextView(requireContext());
+        View content = getLayoutInflater().inflate(R.layout.sheet_history_details, null);
+        GridLayout actions = content.findViewById(R.id.detail_actions);
+        TextView title = content.findViewById(R.id.detail_title);
         title.setText(download.getTitle());
-        title.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_TitleMedium);
-        actions.addView(title);
         BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
         if (download.getStatus() == DownloadStatus.COMPLETED && download.getFileUri() != null) {
-            addAction(actions, "Play", () -> { sheet.dismiss(); onOpen(download); });
-            addAction(actions, "Share", () -> { sheet.dismiss(); share(download); });
+            addAction(actions, "Play", R.drawable.ic_play_arrow, () -> { sheet.dismiss(); onOpen(download); });
+            addAction(actions, "Share", R.drawable.ic_share, () -> { sheet.dismiss(); share(download); });
         }
         if (download.getStatus() == DownloadStatus.FAILED && !download.getSourceUrl().trim().isEmpty()) {
-            addAction(actions, "Download again", () -> {
+            addAction(actions, "Download again", R.drawable.ic_download, () -> {
                 sheet.dismiss();
                 ((MainActivity) requireActivity()).openHome(download.getSourceUrl());
             });
         }
-        addAction(actions, "Delete", () -> { sheet.dismiss(); confirmDelete(download); });
-        sheet.setContentView(actions);
+        addAction(actions, "Delete", R.drawable.ic_delete, () -> { sheet.dismiss(); confirmDelete(download); });
+        sheet.setContentView(content);
         sheet.show();
     }
 
     private void share(DownloadEntity download) {
         if (download.getFileUri() == null) return;
+        Uri uri = Uri.parse(download.getFileUri());
+        String mimeType = requireContext().getContentResolver().getType(uri);
+        if (mimeType == null || mimeType.trim().isEmpty()) {
+            mimeType = "AUDIO".equals(download.getKind()) ? "audio/*" : "video/*";
+        }
         Intent intent = new Intent(Intent.ACTION_SEND)
-                .setType("AUDIO".equals(download.getKind()) ? "audio/*" : "video/*")
-                .putExtra(Intent.EXTRA_STREAM, Uri.parse(download.getFileUri()));
+                .setType(mimeType)
+                .putExtra(Intent.EXTRA_STREAM, uri)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         try { startActivity(Intent.createChooser(intent, "Share")); }
         catch (Throwable error) {
             Log.w(TAG, "Could not share " + download.getTitle(), error);
@@ -249,12 +292,16 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
         }
     }
 
-    private void addAction(LinearLayout parent, String label, Runnable action) {
-        MaterialButton button = new MaterialButton(requireContext());
+    private void addAction(GridLayout parent, String label, int icon, Runnable action) {
+        MaterialButton button = (MaterialButton) getLayoutInflater().inflate(R.layout.view_detail_action, parent, false);
         button.setText(label);
+        button.setIconResource(icon);
         button.setOnClickListener(ignored -> action.run());
-        parent.addView(button, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+        params.width = 0;
+        params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+        parent.addView(button, params);
     }
 
     private void requestMediaPermissions() {
@@ -269,5 +316,9 @@ public final class HistoryFragment extends Fragment implements HistoryAdapter.Li
 
     private void scan(boolean force) {
         AppExecutors.io().execute(() -> DownloadDirectoryScanner.syncIntoHistory(requireContext(), dao, force));
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 }

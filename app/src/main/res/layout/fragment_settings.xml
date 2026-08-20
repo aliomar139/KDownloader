@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/settings_toolbar" android:layout_width="match_parent" android:layout_height="wrap_content"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:paddingTop="20dp">
+    <com.google.android.material.appbar.MaterialToolbar android:id="@+id/settings_toolbar"
+        style="@style/Widget.KDownloader.Toolbar" android:layout_width="match_parent" android:layout_height="64dp"
+        android:layout_marginStart="20dp" android:layout_marginEnd="20dp" app:contentInsetStart="0dp" app:contentInsetStartWithNavigation="0dp"
         android:title="@string/settings" />
-    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
-        <LinearLayout android:id="@+id/settings_content" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="24dp" />
+    <ScrollView android:id="@+id/settings_scroll" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
+        <LinearLayout android:id="@+id/settings_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="24dp" />
     </ScrollView>
 </LinearLayout>

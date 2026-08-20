@@ -36,6 +36,8 @@
     <string name="automatically_resume_interrupted_downloads" formatted="false">Automatically resume interrupted downloads</string>
     <string name="automatically_retry_when_connectivity_returns" formatted="false">Automatically retry when connectivity returns</string>
     <string name="available_formats" formatted="false">Available formats</string>
+    <string name="choose_format_hint" formatted="false">Choose a quality or download audio only</string>
+    <string name="change_link" formatted="false">Change link</string>
     <string name="back" formatted="false">Back</string>
     <string name="background_activity" formatted="false">Background activity</string>
     <string name="background_downloads_may_be_interrupted_exempt_the_app_from_battery_op" formatted="false">Background downloads may be interrupted. Exempt the app from battery optimization for reliable long downloads.</string>
@@ -365,4 +367,11 @@
     <string name="working" formatted="false">Working…</string>
     <string name="yesterday" formatted="false">Yesterday</string>
     <string name="you_ll_confirm_each_download" formatted="false">You\'ll confirm each download</string>
+    <string name="download" formatted="false">Download</string>
+    <string name="sort" formatted="false">Sort</string>
+    <string name="thumbnail" formatted="false">Thumbnail</string>
+    <string name="something_went_wrong" formatted="false">Something went wrong</string>
+    <string name="filter_all" formatted="false">All</string>
+    <string name="filter_video" formatted="false">Video</string>
+    <string name="filter_audio" formatted="false">Audio</string>
 </resources>

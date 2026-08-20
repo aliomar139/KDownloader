@@ -25,7 +25,6 @@ import com.kira.kdownloader.engine.DownloadChoice;
 import com.kira.kdownloader.engine.DownloadOutputSelector;
 import com.kira.kdownloader.engine.DownloaderRepository;
 import com.kira.kdownloader.engine.EngineException;
-import com.kira.kdownloader.engine.ExtractorOptions;
 import com.kira.kdownloader.engine.FormatSelector;
 import com.kira.kdownloader.util.MediaStoreWriter;
 import com.yausername.youtubedl_android.YoutubeDL;
@@ -36,7 +35,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -191,16 +189,15 @@ public final class DownloadService extends Service {
                                       String outputTitle, String processId,
                                       DownloaderRepository.ProgressListener onProgress)
             throws EngineException {
-        List<DownloadAttempt> attempts = buildDownloadAttempts(url, choice);
+        List<DownloadChoice> attempts = buildDownloadAttempts(choice);
         Throwable lastError = null;
 
         for (int index = 0; index < attempts.size(); index++) {
-            DownloadAttempt attempt = attempts.get(index);
+            DownloadChoice attempt = attempts.get(index);
             if (index > 0) clearTemporaryDirectory(outputDirectory);
             try {
                 repository.execute(repository.buildRequest(
-                        url, attempt.choice, outputDirectory, outputTitle,
-                        attempt.useTikTokAppInfo), processId, onProgress);
+                        url, attempt, outputDirectory, outputTitle), processId, onProgress);
 
                 File[] files = outputDirectory.listFiles();
                 List<File> outputs = files == null
@@ -239,30 +236,26 @@ public final class DownloadService extends Service {
         throw new EngineException(messageOrDefault(error, "Download canceled"), error);
     }
 
-    private static List<DownloadAttempt> buildDownloadAttempts(String url, DownloadChoice choice) {
-        List<DownloadAttempt> attempts = new ArrayList<>();
-        addAttempt(attempts, choice, true);
+    private static List<DownloadChoice> buildDownloadAttempts(DownloadChoice choice) {
+        List<DownloadChoice> attempts = new ArrayList<>();
+        addAttempt(attempts, choice);
 
         DownloadChoice extractedChoice = choice.withDirect(null, Collections.emptyMap());
         if (choice.getDirectUrl() != null && !choice.getDirectUrl().trim().isEmpty()) {
-            addAttempt(attempts, extractedChoice, true);
+            addAttempt(attempts, extractedChoice);
         }
-        if (ExtractorOptions.isTikTokUrl(url)) addAttempt(attempts, extractedChoice, false);
 
         if (choice.getKind() == FormatSelector.Kind.VIDEO
                 && !FormatSelector.FALLBACK_VIDEO_SELECTOR.equals(choice.getFormatSelector())) {
             DownloadChoice genericVideoChoice = extractedChoice.withFormatSelector(
                     FormatSelector.FALLBACK_VIDEO_SELECTOR);
-            addAttempt(attempts, genericVideoChoice, true);
-            if (ExtractorOptions.isTikTokUrl(url)) addAttempt(attempts, genericVideoChoice, false);
+            addAttempt(attempts, genericVideoChoice);
         }
         return attempts;
     }
 
-    private static void addAttempt(List<DownloadAttempt> attempts, DownloadChoice choice,
-                                   boolean useTikTokAppInfo) {
-        DownloadAttempt attempt = new DownloadAttempt(choice, useTikTokAppInfo);
-        if (!attempts.contains(attempt)) attempts.add(attempt);
+    private static void addAttempt(List<DownloadChoice> attempts, DownloadChoice choice) {
+        if (!attempts.contains(choice)) attempts.add(choice);
     }
 
     private static void clearTemporaryDirectory(File directory) {
@@ -360,24 +353,4 @@ public final class DownloadService extends Service {
         return message == null || message.trim().isEmpty() ? fallback : message;
     }
 
-    private static final class DownloadAttempt {
-        private final DownloadChoice choice;
-        private final boolean useTikTokAppInfo;
-
-        private DownloadAttempt(DownloadChoice choice, boolean useTikTokAppInfo) {
-            this.choice = choice;
-            this.useTikTokAppInfo = useTikTokAppInfo;
-        }
-
-        @Override public boolean equals(Object other) {
-            if (this == other) return true;
-            if (!(other instanceof DownloadAttempt)) return false;
-            DownloadAttempt that = (DownloadAttempt) other;
-            return useTikTokAppInfo == that.useTikTokAppInfo && choice.equals(that.choice);
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(choice, useTikTokAppInfo);
-        }
-    }
 }

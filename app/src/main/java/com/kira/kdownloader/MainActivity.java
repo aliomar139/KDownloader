@@ -3,9 +3,11 @@ package com.kira.kdownloader;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
@@ -14,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
@@ -32,6 +35,7 @@ import com.kira.kdownloader.settings.ui.SettingsFragment;
 import com.kira.kdownloader.settings.ui.SettingsViewModel;
 import com.kira.kdownloader.ui.HistoryFragment;
 import com.kira.kdownloader.ui.HomeFragment;
+import com.kira.kdownloader.util.MotionPreferences;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -54,9 +58,9 @@ public final class MainActivity extends AppCompatActivity {
     private SettingsFragment settingsFragment;
     private SettingsViewModel settingsViewModel;
     private AppearanceSettings launchAppearance;
-    private AppearanceSettings currentAppearance;
     private String sharedUrl = "";
     private int selectedTab = R.id.tab_home;
+    private int renderedNightMode;
 
     @Override protected void attachBaseContext(Context newBase) {
         String languageTag = "";
@@ -71,12 +75,14 @@ public final class MainActivity extends AppCompatActivity {
     }
 
     @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
+        SplashScreen.installSplashScreen(this);
         launchAppearance = new SettingsRepository(
                 new SharedPreferencesKeyValueStore(this)).read().getAppearance();
-        currentAppearance = launchAppearance;
         AppCompatDelegate.setDefaultNightMode(nightModeFor(launchAppearance.getTheme()));
         EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
+        renderedNightMode = getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK;
 
         if (launchAppearance.getDynamicColor()) DynamicColors.applyToActivityIfAvailable(this);
         if (launchAppearance.getHighContrast()) {
@@ -84,7 +90,7 @@ public final class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
-        applyWindowInsets(findViewById(R.id.main_root));
+        applyWindowInsets(findViewById(R.id.fragment_container), findViewById(R.id.bottom_navigation));
         readSharedUrl(getIntent());
         requestRuntimePermissions();
 
@@ -100,6 +106,14 @@ public final class MainActivity extends AppCompatActivity {
 
         observeAppearance();
         DownloadEvents.getStates().live().observe(this, this::updateHistoryBadge);
+    }
+
+    @Override public void onConfigurationChanged(Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+        int nightMode = configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (nightMode == renderedNightMode || homeFragment == null) return;
+        renderedNightMode = nightMode;
+        reinflateContent();
     }
 
     @Override protected void onSaveInstanceState(Bundle outState) {
@@ -148,6 +162,26 @@ public final class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void reinflateContent() {
+        getSupportFragmentManager().beginTransaction()
+                .detach(homeFragment).detach(historyFragment).detach(settingsFragment)
+                .commitNow();
+
+        setContentView(R.layout.activity_main);
+        applyWindowInsets(findViewById(R.id.fragment_container), findViewById(R.id.bottom_navigation));
+        bottomNavigation = findViewById(R.id.bottom_navigation);
+
+        Fragment target = selectedTab == R.id.tab_history ? historyFragment
+                : selectedTab == R.id.tab_settings ? settingsFragment : homeFragment;
+        getSupportFragmentManager().beginTransaction()
+                .attach(settingsFragment).hide(settingsFragment)
+                .attach(historyFragment).hide(historyFragment)
+                .attach(homeFragment).hide(homeFragment).show(target)
+                .commitNow();
+        bottomNavigation.setSelectedItemId(selectedTab);
+        bottomNavigation.setOnItemSelectedListener(this::onTabSelected);
+    }
+
     private boolean onTabSelected(android.view.MenuItem item) {
         switchTab(item.getItemId(), true);
         return true;
@@ -163,7 +197,7 @@ public final class MainActivity extends AppCompatActivity {
         }
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        if (animate && !currentAppearance.getReduceAnimations()) {
+        if (animate && !MotionPreferences.reduce(this)) {
             transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         } else {
             transaction.setCustomAnimations(0, 0);
@@ -175,7 +209,6 @@ public final class MainActivity extends AppCompatActivity {
     private void observeAppearance() {
         settingsViewModel.getSettingsLive().observe(this, settings -> {
             AppearanceSettings appearance = settings.getAppearance();
-            currentAppearance = appearance;
             LanguageManager.apply(this, appearance.getLanguageTag());
             AppCompatDelegate.setDefaultNightMode(nightModeFor(appearance.getTheme()));
 
@@ -231,12 +264,21 @@ public final class MainActivity extends AppCompatActivity {
                 == android.content.res.Configuration.UI_MODE_NIGHT_YES;
     }
 
-    private static void applyWindowInsets(View root) {
-        ViewCompat.setOnApplyWindowInsetsListener(root, (view, windowInsets) -> {
+    private static void applyWindowInsets(View content, View navigation) {
+        ViewCompat.setOnApplyWindowInsetsListener(content, (view, windowInsets) -> {
             Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            view.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            view.setPadding(bars.left, bars.top, bars.right, 0);
             return windowInsets;
         });
-        ViewCompat.requestApplyInsets(root);
+        ViewCompat.setOnApplyWindowInsetsListener(navigation, (view, windowInsets) -> {
+            Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            ViewGroup.LayoutParams params = view.getLayoutParams();
+            params.height = Math.round(64 * view.getResources().getDisplayMetrics().density) + bars.bottom;
+            view.setLayoutParams(params);
+            view.setPadding(bars.left, 0, bars.right, bars.bottom);
+            return windowInsets;
+        });
+        ViewCompat.requestApplyInsets(content);
+        ViewCompat.requestApplyInsets(navigation);
     }
 }

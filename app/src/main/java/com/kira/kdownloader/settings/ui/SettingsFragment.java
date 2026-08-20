@@ -3,11 +3,9 @@ package com.kira.kdownloader.settings.ui;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -20,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.kira.kdownloader.BuildConfig;
 import com.kira.kdownloader.R;
@@ -48,6 +47,7 @@ public final class SettingsFragment extends Fragment {
     private SettingsViewModel vm;
     private MaterialToolbar toolbar;
     private LinearLayout content;
+    private LinearLayout currentGroup;
     private Route route = Route.HOME;
     private OnBackPressedCallback backCallback;
     private FolderSlot pendingFolder;
@@ -122,9 +122,13 @@ public final class SettingsFragment extends Fragment {
     private void render() {
         if (content == null) return;
         content.removeAllViews();
+        currentGroup = null;
         AppSettings settings = vm.getSettingsValue();
         toolbar.setNavigationIcon(route == Route.HOME ? null : getDrawable(R.drawable.ic_arrow_back));
         toolbar.setTitle(title(route));
+        toolbar.setTitleTextAppearance(requireContext(), route == Route.HOME
+                ? R.style.TextAppearance_KDownloader_Display
+                : R.style.TextAppearance_KDownloader_HeadlineSmall);
         switch (route) {
             case HOME: home(); break;
             case DOWNLOAD: download(settings.getDownload()); break;
@@ -245,7 +249,7 @@ public final class SettingsFragment extends Fragment {
         note("Proxy passwords are stored using Android Keystore-backed encryption and are never included in exports.");
         View test=action("Test connection", null, 0, () -> testProxy(n.getProxyHost(),n.getProxyPort()));
         boolean canTest=proxy&&ProxyValidator.isValidHost(n.getProxyHost())&&ProxyValidator.isValidPort(n.getProxyPort());
-        test.setEnabled(canTest);test.setAlpha(canTest?1f:.45f);
+        test.setEnabled(canTest);test.setAlpha(canTest?1f:.38f);
     }
 
     private void subtitles(SubtitleSettings s) {
@@ -385,35 +389,25 @@ public final class SettingsFragment extends Fragment {
         List<LabeledChoicePreferenceView.Option> options=new ArrayList<>();
         if(includeNone)options.add(new LabeledChoicePreferenceView.Option("","None"));
         for(LanguageManager.Language language:LanguageManager.SUPPORTED)if(!language.getTag().isEmpty())options.add(new LabeledChoicePreferenceView.Option(language.getTag(),language.getDisplay()));
-        content.addView(new LabeledChoicePreferenceView(requireContext(),title,options,selected,enabled,change));
+        addPreference(new LabeledChoicePreferenceView(requireContext(),title,options,selected,enabled,change));
     }
 
     private <T extends Enum<T> & SettingOption> void choice(String title, T[] values, T selected,
                                                               boolean enabled, Consumer<T> change) {
-        content.addView(new SingleChoicePreferenceView<>(requireContext(),title,values,selected,enabled,change));
+        addPreference(new SingleChoicePreferenceView<>(requireContext(),title,values,selected,enabled,change));
     }
 
     private void toggle(String title, String subtitle, boolean checked, boolean enabled, Consumer<Boolean> change) {
-        content.addView(new SwitchPreferenceView(requireContext(),title,subtitle,checked,enabled,change));
+        addPreference(new SwitchPreferenceView(requireContext(),title,subtitle,checked,enabled,change));
     }
 
     private View action(String title, String subtitle, int icon, Runnable click) {
-        ClickablePreferenceView row=new ClickablePreferenceView(requireContext(),title,subtitle,icon,click);content.addView(row);return row;
-    }
-
-    private void text(String title,String value,boolean numeric,boolean password,Consumer<String> change){text(title,value,numeric,password,change,true);}
-    private void text(String title,String value,boolean numeric,boolean password,Consumer<String> change,boolean enabled){
-        View row=action(title,password&&!value.isEmpty()?"••••••••":value,0,()->{
-            EditText input=new EditText(requireContext());input.setText(value);input.setSelectAllOnFocus(true);
-            if(numeric)input.setInputType(InputType.TYPE_CLASS_NUMBER);if(password)input.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            new MaterialAlertDialogBuilder(requireContext()).setTitle(title).setView(input).setNegativeButton(R.string.cancel,null)
-                    .setPositiveButton(android.R.string.ok,(d,w)->change.accept(input.getText().toString())).show();
-        });row.setEnabled(enabled);row.setAlpha(enabled?1f:.45f);
+        ClickablePreferenceView row=new ClickablePreferenceView(requireContext(),title,subtitle,icon,click);addPreference(row);return row;
     }
 
     private void text(String title,String value,boolean numeric,boolean password,Consumer<String> change,
                       boolean enabled,String summary,String placeholder,Function<String,String> validate){
-        content.addView(new TextEntryPreferenceView(requireContext(),title,value,numeric,password,enabled,summary,placeholder,validate,change));
+        addPreference(new TextEntryPreferenceView(requireContext(),title,value,numeric,password,enabled,summary,placeholder,validate,change));
     }
 
     private static String positiveIntegerError(String value){try{return Integer.parseInt(value)>=1?null:"Enter a value of 1 or more";}catch(NumberFormatException e){return "Enter a value of 1 or more";}}
@@ -428,11 +422,30 @@ public final class SettingsFragment extends Fragment {
     }
 
     private void slider(String title,int value,int min,int max,Consumer<Integer> change){
-        content.addView(new IntSliderPreferenceView(requireContext(),title,value,min,max,change));
+        addPreference(new IntSliderPreferenceView(requireContext(),title,value,min,max,change));
     }
 
-    private void group(String title){content.addView(new PreferenceGroupTitleView(requireContext(),title));}
-    private void note(String text){content.addView(new PreferenceNoteView(requireContext(),text));}
+    private void group(String title){
+        content.addView(new PreferenceGroupTitleView(requireContext(),title));
+        startGroup();
+    }
+    private void note(String text){addPreference(new PreferenceNoteView(requireContext(),text));}
+
+    private void startGroup() {
+        MaterialCardView card = (MaterialCardView) getLayoutInflater().inflate(
+                R.layout.view_settings_group, content, false);
+        currentGroup = card.findViewById(R.id.settings_group_rows);
+        content.addView(card);
+    }
+
+    private void addPreference(View preference) {
+        if (currentGroup == null) startGroup();
+        if (currentGroup.getChildCount() > 0) {
+            getLayoutInflater().inflate(R.layout.view_settings_divider, currentGroup, true);
+        }
+        currentGroup.addView(preference, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+    }
     private void status(String title,boolean ok,String okText,String notOkText,String actionText,Runnable action){action(title,ok?okText:notOkText+" — tap to "+actionText,ok?R.drawable.ic_check_circle:R.drawable.ic_error_outline,action);}
     private void confirm(String title,String message,Runnable action){ConfirmDialogView.show(requireContext(),title,message,action);}
     private void launch(Intent intent){if(intent==null)return;try{startActivity(intent);}catch(Throwable e){Toast.makeText(requireContext(),"No app can handle this action",Toast.LENGTH_SHORT).show();}}

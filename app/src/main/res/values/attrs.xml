@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="brandAccent" format="color" />
+    <attr name="statusSuccess" format="color" />
+    <attr name="statusSuccessContainer" format="color" />
+    <attr name="colorOnStatusSuccessContainer" format="color" />
+    <attr name="statusWarning" format="color" />
+    <attr name="statusWarningContainer" format="color" />
+    <attr name="colorOnStatusWarningContainer" format="color" />
+</resources>

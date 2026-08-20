@@ -6,22 +6,21 @@ import android.util.Log;
 
 import androidx.annotation.WorkerThread;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.kira.kdownloader.BuildConfig;
 import com.kira.kdownloader.R;
 import com.yausername.ffmpeg.FFmpeg;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLRequest;
-import com.yausername.youtubedl_android.mapper.VideoFormat;
-import com.yausername.youtubedl_android.mapper.VideoInfo;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,8 +39,7 @@ public final class DownloaderRepository implements AutoCloseable {
     private static final String YTDLP_PREFERENCES_NAME = "youtubedl-android";
     private static final String YTDLP_VERSION_KEY = "dlpVersion";
     private static final String YTDLP_VERSION_NAME_KEY = "dlpVersionName";
-    private static final String TIKTOK_INSTALL_IDS_KEY = "tiktok_install_ids";
-    private static final int TIKTOK_INSTALL_ID_COUNT = 3;
+    private static final String COOKIE_FILE_NAME = "extractor-cookies.txt";
     private static final long UPDATE_INTERVAL_MS = 24L * 60L * 60L * 1000L;
     private static final int MAX_UPDATE_ATTEMPTS = 3;
     private static final long UPDATE_RETRY_DELAY_MS = 750L;
@@ -49,8 +47,6 @@ public final class DownloaderRepository implements AutoCloseable {
 
     private static final ReentrantLock INIT_LOCK = new ReentrantLock();
     private static final ReentrantLock UPDATE_LOCK = new ReentrantLock();
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-    private static final Pattern TIKTOK_INSTALL_ID_PATTERN = Pattern.compile("\\d{19}");
     private static final Pattern SAFE_HEADER_NAME = Pattern.compile("[A-Za-z0-9-]+");
     private static final Pattern INVALID_FILE_NAME_CHARACTERS =
             Pattern.compile("[\\\\/:*?\"<>|\\x00-\\x1F]");
@@ -102,65 +98,30 @@ public final class DownloaderRepository implements AutoCloseable {
 
     @WorkerThread
     public MediaInfo fetchInfo(String url) throws EngineException {
-        boolean retryWithoutTikTokAppInfo = ExtractorOptions.isTikTokUrl(url);
         Throwable lastError = null;
-        int strategyCount = retryWithoutTikTokAppInfo ? 2 : 1;
-
-        for (int index = 0; index < strategyCount; index++) {
-            boolean useTikTokAppInfo = index == 0;
+        for (int attempt = 0; attempt < 2; attempt++) {
             try {
-                YoutubeDLRequest request = baseRequest(url, useTikTokAppInfo)
+                YoutubeDLRequest request = baseRequest(url)
                         .addOption("--quiet")
                         .addOption("--no-warnings")
                         .addOption("--no-progress");
-                VideoInfo info = YoutubeDL.getInstance().getInfo(request);
-                List<FormatInput> formats = new ArrayList<>();
-                List<VideoFormat> sourceFormats = info.getFormats();
-                if (sourceFormats != null) {
-                    for (VideoFormat format : sourceFormats) {
-                        long exactSize = format.getFileSize();
-                        long approximateSize = format.getFileSizeApproximate();
-                        Long size = exactSize > 0 ? exactSize
-                                : approximateSize > 0 ? approximateSize : null;
-                        formats.add(new FormatInput(
-                                valueOrEmpty(format.getFormatId()),
-                                valueOrEmpty(format.getExt()),
-                                format.getHeight() > 0 ? format.getHeight() : null,
-                                format.getVcodec(),
-                                format.getAcodec(),
-                                format.getUrl(),
-                                format.getHttpHeaders() == null
-                                        ? Collections.emptyMap() : format.getHttpHeaders(),
-                                size
-                        ));
-                    }
-                }
-                return new MediaInfo(
-                        info.getTitle() == null ? url : info.getTitle(),
-                        info.getThumbnail(),
-                        FormatSelector.choices(formats, url),
-                        info.getDuration(),
-                        info.getUploader()
-                );
+                request.addOption("--dump-json");
+                JsonNode info = YoutubeDL.getInstance().getObjectMapper().readTree(
+                        YoutubeDL.getInstance().execute(request).getOut());
+                return mediaInfoFromJson(info, url);
             } catch (Throwable error) {
                 lastError = error;
-                if (useTikTokAppInfo && retryWithoutTikTokAppInfo) {
-                    Log.w(TAG, "TikTok mobile extraction failed; retrying web extraction", error);
-                }
+                if (attempt == 0) Log.w(TAG, "Media extraction failed; retrying once", error);
             }
         }
 
         if (lastError == null) lastError = new IllegalStateException("No media information strategy was attempted");
+        Log.e(TAG, "Could not fetch media information for " + url, lastError);
         throw new EngineException(readableErrorMessage(url, lastError), lastError);
     }
 
     public YoutubeDLRequest buildRequest(String url, DownloadChoice choice, File outputDirectory,
                                          String outputTitle) {
-        return buildRequest(url, choice, outputDirectory, outputTitle, true);
-    }
-
-    public YoutubeDLRequest buildRequest(String url, DownloadChoice choice, File outputDirectory,
-                                         String outputTitle, boolean useTikTokAppInfo) {
         String outputPath = new File(
                 outputDirectory, safeOutputTitle(outputTitle) + ".%(ext)s").getAbsolutePath();
         String directUrl = choice.getDirectUrl();
@@ -178,7 +139,7 @@ public final class DownloaderRepository implements AutoCloseable {
             return request;
         }
 
-        YoutubeDLRequest request = baseRequest(url, useTikTokAppInfo)
+        YoutubeDLRequest request = baseRequest(url)
                 .addOption("-o", outputPath)
                 .addOption("-f", choice.getFormatSelector());
         addOutputOptions(request, choice);
@@ -211,38 +172,18 @@ public final class DownloaderRepository implements AutoCloseable {
         return YoutubeDL.getInstance().destroyProcessById(processId);
     }
 
-    private YoutubeDLRequest baseRequest(String url, boolean useTikTokAppInfo) {
-        YoutubeDLRequest request = new YoutubeDLRequest(url).addOption("--no-playlist");
+    private YoutubeDLRequest baseRequest(String url) {
+        File cookieFile = new File(appContext.getNoBackupFilesDir(), COOKIE_FILE_NAME);
+        YoutubeDLRequest request = new YoutubeDLRequest(url)
+                .addOption("--no-playlist")
+                .addOption("--cookies", cookieFile.getAbsolutePath())
+                .addOption("--extractor-retries", "3")
+                .addOption("--retries", "3")
+                .addOption("--socket-timeout", "30");
         if (ExtractorOptions.isYouTubeUrl(url)) {
             request.addOption("--remote-components", "ejs:github");
         }
-        if (useTikTokAppInfo && ExtractorOptions.isTikTokUrl(url)) {
-            request.addOption("--extractor-args", ExtractorOptions.tikTokAppInfo(tikTokInstallIds()));
-        }
         return request;
-    }
-
-    private List<String> tikTokInstallIds() {
-        SharedPreferences preferences = appContext.getSharedPreferences(
-                PREFERENCES_NAME, Context.MODE_PRIVATE);
-        String stored = preferences.getString(TIKTOK_INSTALL_IDS_KEY, null);
-        List<String> storedIds = new ArrayList<>();
-        if (stored != null) {
-            for (String id : stored.split(",")) {
-                if (TIKTOK_INSTALL_ID_PATTERN.matcher(id).matches()) storedIds.add(id);
-            }
-        }
-        if (storedIds.size() == TIKTOK_INSTALL_ID_COUNT) return storedIds;
-
-        LinkedHashSet<String> generated = new LinkedHashSet<>();
-        while (generated.size() < TIKTOK_INSTALL_ID_COUNT) {
-            StringBuilder id = new StringBuilder("73");
-            for (int index = 0; index < 17; index++) id.append(SECURE_RANDOM.nextInt(10));
-            generated.add(id.toString());
-        }
-        List<String> result = new ArrayList<>(generated);
-        preferences.edit().putString(TIKTOK_INSTALL_IDS_KEY, String.join(",", result)).apply();
-        return result;
     }
 
     private String ensureCurrentYtDlpInstalled() throws IOException {
@@ -343,12 +284,84 @@ public final class DownloaderRepository implements AutoCloseable {
         }
         String lower = details.toString().toLowerCase(Locale.ROOT);
         if (ExtractorOptions.isTikTokUrl(url)
-                && (lower.contains("expecting value") || lower.contains("column 1"))) {
-            return "TikTok returned an invalid response. Check the connection and try again.";
+                && (lower.contains("expecting value") || lower.contains("column 1")
+                || lower.contains("unexpected response from webpage request"))) {
+            return "TikTok did not return this video. Try the public web link again.";
+        }
+        if (ExtractorOptions.isFacebookUrl(url) && lower.contains("cannot parse data")) {
+            return "Facebook did not expose downloadable media for this link. Public videos work best.";
+        }
+        if ((ExtractorOptions.isInstagramUrl(url) || ExtractorOptions.isFacebookUrl(url))
+                && (lower.contains("login required") || lower.contains("requires authentication")
+                || lower.contains("requested content is not available"))) {
+            return "This post requires an account or is not public.";
         }
         String message = error.getMessage();
         return message == null || message.trim().isEmpty()
                 ? "Could not fetch media info" : message;
+    }
+
+    static MediaInfo mediaInfoFromJson(JsonNode info, String sourceUrl) throws EngineException {
+        if (info == null || !info.isObject()) {
+            throw new EngineException("The site returned invalid media information");
+        }
+        List<FormatInput> formats = new ArrayList<>();
+        JsonNode sourceFormats = info.path("formats");
+        if (sourceFormats.isArray()) {
+            for (JsonNode format : sourceFormats) {
+                long exactSize = positiveLong(format.get("filesize"));
+                long approximateSize = positiveLong(format.get("filesize_approx"));
+                int height = positiveInt(format.get("height"));
+                Long size = null;
+                if (exactSize > 0) size = exactSize;
+                else if (approximateSize > 0) size = approximateSize;
+                formats.add(new FormatInput(
+                        valueOrEmpty(textOrNull(format.get("format_id"))),
+                        valueOrEmpty(textOrNull(format.get("ext"))),
+                        height > 0 ? height : null,
+                        textOrNull(format.get("vcodec")),
+                        textOrNull(format.get("acodec")),
+                        textOrNull(format.get("url")),
+                        stringMap(format.get("http_headers")),
+                        size
+                ));
+            }
+        }
+        if (formats.isEmpty()) throw new EngineException("No downloadable media was found at this link");
+
+        String title = textOrNull(info.get("title"));
+        return new MediaInfo(
+                title == null || title.trim().isEmpty() ? sourceUrl : title,
+                textOrNull(info.get("thumbnail")),
+                FormatSelector.choices(formats, sourceUrl),
+                positiveInt(info.get("duration")),
+                textOrNull(info.get("uploader"))
+        );
+    }
+
+    static long positiveLong(JsonNode value) {
+        return value == null || !value.isNumber() || value.longValue() <= 0L
+                ? 0L : value.longValue();
+    }
+
+    static int positiveInt(JsonNode value) {
+        return (int) Math.min(positiveLong(value), Integer.MAX_VALUE);
+    }
+
+    private static String textOrNull(JsonNode value) {
+        return value == null || value.isNull() ? null : value.asText();
+    }
+
+    private static Map<String, String> stringMap(JsonNode value) {
+        if (value == null || !value.isObject()) return Collections.emptyMap();
+        Map<String, String> result = new LinkedHashMap<>();
+        Iterator<Map.Entry<String, JsonNode>> fields = value.fields();
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> field = fields.next();
+            String text = textOrNull(field.getValue());
+            if (text != null) result.put(field.getKey(), text);
+        }
+        return result;
     }
 
     private void updateEngineIfNeeded() {
@@ -367,7 +380,7 @@ public final class DownloaderRepository implements AutoCloseable {
             for (int attempt = 0; attempt < MAX_UPDATE_ATTEMPTS; attempt++) {
                 try {
                     YoutubeDL.getInstance().updateYoutubeDL(
-                            appContext, YoutubeDL.UpdateChannel._STABLE);
+                            appContext, YoutubeDL.UpdateChannel._NIGHTLY);
                     preferences.edit().putLong(LAST_UPDATE_ATTEMPT, currentTime).apply();
                     Log.i(TAG, "yt-dlp is up to date: "
                             + YoutubeDL.getInstance().versionName(appContext));

@@ -1,7 +1,8 @@
 package com.kira.kdownloader.ui;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.GradientDrawable;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +14,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.google.android.material.color.MaterialColors;
 import com.kira.kdownloader.R;
 import com.kira.kdownloader.data.DownloadEntity;
 import com.kira.kdownloader.data.DownloadStatus;
 import com.kira.kdownloader.util.AppExecutors;
 import com.kira.kdownloader.util.MediaThumbnails;
+import com.kira.kdownloader.util.MotionPreferences;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -102,13 +106,13 @@ final class HistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         int backgroundAttr;
         int contentAttr;
         if (status == DownloadStatus.COMPLETED) {
-            label = "Done";
-            backgroundAttr = com.google.android.material.R.attr.colorTertiaryContainer;
-            contentAttr = com.google.android.material.R.attr.colorOnTertiaryContainer;
+            label = "Completed";
+            backgroundAttr = R.attr.statusSuccessContainer;
+            contentAttr = R.attr.colorOnStatusSuccessContainer;
         } else if (status == DownloadStatus.RUNNING) {
-            label = "Downloading";
-            backgroundAttr = com.google.android.material.R.attr.colorSecondaryContainer;
-            contentAttr = com.google.android.material.R.attr.colorOnSecondaryContainer;
+            label = "Running";
+            backgroundAttr = com.google.android.material.R.attr.colorPrimaryContainer;
+            contentAttr = com.google.android.material.R.attr.colorOnPrimaryContainer;
         } else {
             label = "Failed";
             backgroundAttr = com.google.android.material.R.attr.colorErrorContainer;
@@ -116,19 +120,30 @@ final class HistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
         view.setText(label);
         view.setTextColor(MaterialColors.getColor(view, contentAttr));
-        GradientDrawable background = new GradientDrawable();
-        background.setColor(MaterialColors.getColor(view, backgroundAttr));
-        background.setCornerRadius(100f);
+        Drawable background = view.getBackground().mutate();
+        background.setTint(MaterialColors.getColor(view, backgroundAttr));
         view.setBackground(background);
+        int icon = status == DownloadStatus.COMPLETED ? R.drawable.ic_check_circle
+                : status == DownloadStatus.RUNNING ? R.drawable.ic_download : R.drawable.ic_error_outline;
+        Drawable statusIcon = view.getContext().getDrawable(icon).mutate();
+        int size = Math.round(12 * view.getResources().getDisplayMetrics().density);
+        statusIcon.setBounds(0, 0, size, size);
+        view.setCompoundDrawableTintList(ColorStateList.valueOf(MaterialColors.getColor(view, contentAttr)));
+        view.setCompoundDrawablePadding(Math.round(4 * view.getResources().getDisplayMetrics().density));
+        view.setCompoundDrawables(statusIcon, null, null, null);
     }
 
     private static void bindThumbnail(ImageView view, DownloadEntity download) {
         boolean audio = "AUDIO".equalsIgnoreCase(download.getKind());
-        int fallback = audio ? R.drawable.ic_music_note : R.drawable.ic_videocam;
+        int fallback = audio ? R.drawable.placeholder_audio : R.drawable.placeholder_video;
         view.setTag(download.getId());
         view.setImageResource(fallback);
         if (download.getThumbnailUrl() != null) {
-            Glide.with(view).load(download.getThumbnailUrl()).placeholder(fallback).error(fallback).into(view);
+            RequestBuilder<Drawable> request = Glide.with(view).load(download.getThumbnailUrl());
+            if (!MotionPreferences.reduce(view.getContext())) {
+                request = request.transition(DrawableTransitionOptions.withCrossFade(200));
+            }
+            request.placeholder(fallback).error(fallback).into(view);
         } else if (download.getFileUri() != null) {
             Bitmap cached = MediaThumbnails.peek(download.getFileUri(), 128);
             if (cached != null) view.setImageBitmap(cached);

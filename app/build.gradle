@@ -5,9 +5,9 @@ plugins {
 }
 
 // This app-level raw resource overrides youtubedl-android's bundled yt-dlp.
-// Source: https://github.com/yt-dlp/yt-dlp/releases/tag/2026.07.04
-def bundledYtDlpVersion = '2026.07.04'
-def bundledYtDlpSha256 = '495be29ff4d9d4e9be7eabdfef225221e5d5282e77f2f505abc6dca80349f3fd'
+// Source: https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/tag/2026.08.19.233000
+def bundledYtDlpVersion = '2026.08.19.233000'
+def bundledYtDlpSha256 = '972baad24f3ad08f99b893ae27cf359934eeed2359d39b5d090f022b70ba54a8'
 
 android {
     namespace = 'com.kira.kdownloader'
@@ -83,6 +83,7 @@ dependencies {
     def ytdlVersion = '0.18.1'
     implementation "io.github.junkfood02.youtubedl-android:library:${ytdlVersion}"
     implementation "io.github.junkfood02.youtubedl-android:ffmpeg:${ytdlVersion}"
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.1'
 
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'
@@ -91,6 +92,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation 'androidx.lifecycle:lifecycle-runtime:2.8.6'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.8.6'
     implementation 'androidx.lifecycle:lifecycle-livedata:2.8.6'

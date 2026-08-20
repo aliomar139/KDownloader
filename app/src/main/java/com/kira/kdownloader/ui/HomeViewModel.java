@@ -86,6 +86,11 @@ public final class HomeViewModel extends AndroidViewModel {
         });
     }
 
+    public synchronized void reset() {
+        cancelFetch();
+        state.setValue(HomeUiState.Idle.INSTANCE);
+    }
+
     private synchronized void cancelFetch() {
         fetchGeneration.incrementAndGet();
         if (fetchFuture != null) fetchFuture.cancel(true);
