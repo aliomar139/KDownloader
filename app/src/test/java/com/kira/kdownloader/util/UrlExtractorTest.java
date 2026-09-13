@@ -16,4 +16,11 @@ public class UrlExtractorTest {
     @Test public void removesSentencePunctuationAfterAUrl() {
         assertEquals("https://example.com/video", UrlExtractor.fromText("Try https://example.com/video)."));
     }
+
+    @Test public void stripsTrackingParametersFromTikTokAndSocialUrls() {
+        assertEquals("https://www.tiktok.com/@user/video/1234567890",
+                UrlExtractor.fromText("Check this out: https://www.tiktok.com/@user/video/1234567890?is_from_webapp=1&sender_device=pc&share_app_id=1233"));
+        assertEquals("https://www.youtube.com/watch?v=abc123",
+                UrlExtractor.fromText("https://www.youtube.com/watch?v=abc123&si=xyz123&feature=shared"));
+    }
 }

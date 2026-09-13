@@ -173,14 +173,21 @@ public final class DownloaderRepository implements AutoCloseable {
     }
 
     private YoutubeDLRequest baseRequest(String url) {
-        File cookieFile = new File(appContext.getNoBackupFilesDir(), COOKIE_FILE_NAME);
         YoutubeDLRequest request = new YoutubeDLRequest(url)
                 .addOption("--no-playlist")
-                .addOption("--cookies", cookieFile.getAbsolutePath())
+                .addOption("--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
                 .addOption("--extractor-retries", "3")
                 .addOption("--retries", "3")
                 .addOption("--socket-timeout", "30");
-        if (ExtractorOptions.isYouTubeUrl(url)) {
+
+        File cookieFile = new File(appContext.getNoBackupFilesDir(), COOKIE_FILE_NAME);
+        if (cookieFile.isFile() && cookieFile.length() > 0) {
+            request.addOption("--cookies", cookieFile.getAbsolutePath());
+        }
+
+        if (ExtractorOptions.isTikTokUrl(url)) {
+            request.addOption("--extractor-args", "tiktok:app_info=");
+        } else if (ExtractorOptions.isYouTubeUrl(url)) {
             request.addOption("--remote-components", "ejs:github");
         }
         return request;
@@ -283,10 +290,14 @@ public final class DownloaderRepository implements AutoCloseable {
             if (message != null && !message.trim().isEmpty()) details.append(message).append('\n');
         }
         String lower = details.toString().toLowerCase(Locale.ROOT);
-        if (ExtractorOptions.isTikTokUrl(url)
-                && (lower.contains("expecting value") || lower.contains("column 1")
-                || lower.contains("unexpected response from webpage request"))) {
-            return "TikTok did not return this video. Try the public web link again.";
+        if (ExtractorOptions.isTikTokUrl(url)) {
+            if (lower.contains("impersonat") || lower.contains("cookies-from-browser")
+                    || lower.contains("user-agent is blocked") || lower.contains("waf")
+                    || lower.contains("expecting value") || lower.contains("column 1")
+                    || lower.contains("unexpected response from webpage request")
+                    || lower.contains("video not available")) {
+                return "TikTok blocked access or this video is private/unavailable. Try copying the link directly from the browser or app.";
+            }
         }
         if (ExtractorOptions.isFacebookUrl(url) && lower.contains("cannot parse data")) {
             return "Facebook did not expose downloadable media for this link. Public videos work best.";
@@ -295,6 +306,9 @@ public final class DownloaderRepository implements AutoCloseable {
                 && (lower.contains("login required") || lower.contains("requires authentication")
                 || lower.contains("requested content is not available"))) {
             return "This post requires an account or is not public.";
+        }
+        if (lower.contains("impersonat") || lower.contains("no impersonate target")) {
+            return "The site requested browser impersonation which is restricted. Please try another link.";
         }
         String message = error.getMessage();
         return message == null || message.trim().isEmpty()

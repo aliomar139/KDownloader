@@ -8,6 +8,8 @@ public class ExtractorOptionsTest {
     @Test public void recognizesRegularAndShortenedTikTokHosts() {
         assertEquals(true, ExtractorOptions.isTikTokUrl("https://www.tiktok.com/@user/video/1"));
         assertEquals(true, ExtractorOptions.isTikTokUrl("https://vt.tiktok.com/example/"));
+        assertEquals(true, ExtractorOptions.isTikTokUrl("https://api16.tiktokv.com/aweme/v1/"));
+        assertEquals(true, ExtractorOptions.isTikTokUrl("https://www.douyin.com/video/12345"));
     }
 
     @Test public void doesNotTrustTikTokLookalikeDomains() {

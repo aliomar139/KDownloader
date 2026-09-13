@@ -13,7 +13,7 @@ public final class FormatSelector {
     public static final String FALLBACK_VIDEO_SELECTOR = "bestvideo*+bestaudio/best";
     private static final List<Integer> PREFERRED_HEIGHTS = Arrays.asList(1080, 720, 480, 360);
     private static final Set<String> SINGLE_QUALITY_HOSTS = new HashSet<>(Arrays.asList(
-            "instagram.com", "instagr.am", "tiktok.com", "facebook.com", "fb.com", "fb.watch"));
+            "instagram.com", "instagr.am", "tiktok.com", "tiktokv.com", "douyin.com", "facebook.com", "fb.com", "fb.watch"));
 
     public enum Kind { VIDEO, AUDIO }
 

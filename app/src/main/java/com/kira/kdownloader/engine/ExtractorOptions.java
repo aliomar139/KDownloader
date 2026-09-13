@@ -7,7 +7,9 @@ public final class ExtractorOptions {
     private ExtractorOptions() {}
 
     public static boolean isTikTokUrl(String sourceUrl) {
-        return hostMatches(sourceUrl, "tiktok.com");
+        return hostMatches(sourceUrl, "tiktok.com")
+                || hostMatches(sourceUrl, "tiktokv.com")
+                || hostMatches(sourceUrl, "douyin.com");
     }
 
     public static boolean isYouTubeUrl(String sourceUrl) {
