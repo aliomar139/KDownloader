@@ -5,9 +5,9 @@ plugins {
 }
 
 // This app-level raw resource overrides youtubedl-android's bundled yt-dlp.
-// Source: https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/tag/2026.08.19.233000
-def bundledYtDlpVersion = '2026.08.19.233000'
-def bundledYtDlpSha256 = '972baad24f3ad08f99b893ae27cf359934eeed2359d39b5d090f022b70ba54a8'
+// Source: https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/tag/2026.08.30.232658
+def bundledYtDlpVersion = '2026.08.30.232658'
+def bundledYtDlpSha256 = '3f1b267b4488f3aed3731a9e84a44011ca5569901868532e10ee11fd07d69707'
 
 android {
     namespace = 'com.kira.kdownloader'

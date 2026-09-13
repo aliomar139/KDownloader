@@ -80,6 +80,7 @@ public final class MainActivity extends AppCompatActivity {
                 new SharedPreferencesKeyValueStore(this)).read().getAppearance();
         AppCompatDelegate.setDefaultNightMode(nightModeFor(launchAppearance.getTheme()));
         EdgeToEdge.enable(this);
+        settingsViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
         super.onCreate(savedInstanceState);
         renderedNightMode = getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_MASK;
@@ -94,7 +95,6 @@ public final class MainActivity extends AppCompatActivity {
         readSharedUrl(getIntent());
         requestRuntimePermissions();
 
-        settingsViewModel = new ViewModelProvider(this).get(SettingsViewModel.class);
         bottomNavigation = findViewById(R.id.bottom_navigation);
         selectedTab = savedInstanceState == null
                 ? R.id.tab_home : savedInstanceState.getInt(STATE_SELECTED_TAB, R.id.tab_home);
@@ -102,7 +102,6 @@ public final class MainActivity extends AppCompatActivity {
 
         bottomNavigation.setOnItemSelectedListener(this::onTabSelected);
         bottomNavigation.setSelectedItemId(selectedTab);
-        switchTab(selectedTab, false);
 
         observeAppearance();
         DownloadEvents.getStates().live().observe(this, this::updateHistoryBadge);
@@ -158,6 +157,9 @@ public final class MainActivity extends AppCompatActivity {
             homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentByTag(TAG_HOME);
             historyFragment = (HistoryFragment) getSupportFragmentManager().findFragmentByTag(TAG_HISTORY);
             settingsFragment = (SettingsFragment) getSupportFragmentManager().findFragmentByTag(TAG_SETTINGS);
+            if (homeFragment == null) homeFragment = HomeFragment.newInstance(sharedUrl);
+            if (historyFragment == null) historyFragment = new HistoryFragment();
+            if (settingsFragment == null) settingsFragment = new SettingsFragment();
             homeFragment.setInitialUrl(sharedUrl);
         }
     }
@@ -202,7 +204,11 @@ public final class MainActivity extends AppCompatActivity {
         } else {
             transaction.setCustomAnimations(0, 0);
         }
-        transaction.hide(homeFragment).hide(historyFragment).hide(settingsFragment).show(target).commit();
+        if (homeFragment != null && homeFragment.isAdded()) transaction.hide(homeFragment);
+        if (historyFragment != null && historyFragment.isAdded()) transaction.hide(historyFragment);
+        if (settingsFragment != null && settingsFragment.isAdded()) transaction.hide(settingsFragment);
+        if (target != null && target.isAdded()) transaction.show(target);
+        transaction.commitAllowingStateLoss();
         selectedTab = tabId;
     }
 
